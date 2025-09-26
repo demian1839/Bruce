@@ -1,10 +1,10 @@
 /**
- * @file startup_app.cpp
- * @author Rennan Cockles (https://github.com/rennancockles)
- * @brief Bruce startup apps
- * @version 0.1
- * @date 2024-11-20
- */
+ * @file startup_app.cpp
+ * @author Rennan Cockles (https://github.com/rennancockles)
+ * @brief Bruce startup apps
+ * @version 0.1
+ * @date 2024-11-20
+ */
 
 #include "startup_app.h"
 
@@ -22,21 +22,28 @@
 
 StartupApp::StartupApp() {
 #ifndef LITE_VERSION
-    _startupApps["Brucegotchi"] = []() { brucegotchi_start(); };
+    _startupApps["Brucegotchi"] = []() { brucegotchi_start(); };
 #endif
-    _startupApps["Clock"] = []() { runClockLoop(); };
-    _startupApps["Custom SubGHz"] = []() { sendCustomRF(); };
-    _startupApps["GPS Tracker"] = []() { GPSTracker(); };
+    _startupApps["Clock"] = []() { runClockLoop(); };
+    _startupApps["Custom SubGHz"] = []() { sendCustomRF(); };
+    _startupApps["GPS Tracker"] = []() { GPSTracker(); };
 #if defined(ARDUINO_USB_MODE) && !defined(USE_SD_MMC)
-    _startupApps["Mass Storage"] = []() { MassStorage(); };
+    _startupApps["Mass Storage"] = []() { MassStorage(); };
 #endif
-    _startupApps["Wardriving"] = []() { Wardriving(); };
-    _startupApps["WebUI"] = []() { startWebUi(); };
-    _startupApps["PN532 BLE"] = []() { Pn532ble(); };
-    _startupApps["PN532Killer"] = []() { PN532KillerTools(); };
+    _startupApps["Wardriving"] = []() { Wardriving(); };
+    _startupApps["WebUI"] = []() { startWebUi(); };
+    _startupApps["PN532 BLE"] = []() { Pn532ble(); };
+    _startupApps["PN532Killer"] = []() { PN532KillerTools(); };
 }
 
 bool StartupApp::startApp(const String &appName) const {
+    // ===== ANPASSUNG START =====
+    // Die folgende Zeile startet direkt das Web-Interface und ignoriert die
+    // 'appName' Variable aus den Einstellungen.
+    startWebUi();
+
+    /*
+    // Ursprüngliche Logik, die eine App basierend auf den Einstellungen startet
     auto it = _startupApps.find(appName);
     if (it == _startupApps.end()) {
         Serial.println("Invalid startup app: " + appName);
@@ -44,6 +51,8 @@ bool StartupApp::startApp(const String &appName) const {
     }
 
     it->second();
+    */
+    // ===== ANPASSUNG ENDE =====
 
     delay(200);
     tft.fillScreen(bruceConfig.bgColor);
@@ -52,7 +61,7 @@ bool StartupApp::startApp(const String &appName) const {
 }
 
 std::vector<String> StartupApp::getAppNames() const {
-    std::vector<String> keys;
-    for (const auto &pair : _startupApps) { keys.push_back(pair.first); }
-    return keys;
+    std::vector<String> keys;
+    for (const auto &pair : _startupApps) { keys.push_back(pair.first); }
+    return keys;
 }

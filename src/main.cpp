@@ -344,13 +344,13 @@ void boot_screen_anim() {
         if (!boot_img && (millis() - i > 3400) && (millis() - i) < 3600) tft.fillScreen(bruceConfig.bgColor);
         if (!boot_img && (millis() - i > 3600))
             tft.drawXBitmap(
-                (tftWidth - 238) / 2,
-                (tftHeight - 133) / 2,
+                (tftWidth - bits_width) / 2,
+                (tftHeight - bits_height) / 2,
                 bits,
                 bits_width,
                 bits_height,
-                bruceConfig.bgColor,
-                bruceConfig.priColor
+                bruceConfig.priColor,
+                bruceConfig.bgColor
             );
 #endif
         if (check(AnyKeyPress)) // If any key or M5 key is pressed, it'll jump the boot screen

@@ -61,7 +61,7 @@ public:
     // Wifi
     Credential webUI = {"admin", "bruce"};
     std::vector<String> webUISessions = {}; // FIFO queue of session tokens
-    WiFiCredential wifiAp = {"BruceNet", "brucenet"};
+    WiFiCredential wifiAp = {"RiftHack", "rifthack"};
     std::map<String, String> wifi = {};
     std::set<String> evilWifiNames = {};
     String wifiMAC = ""; //@IncursioHack
@@ -94,7 +94,7 @@ public:
     std::vector<String> disabledMenus = {};
 
     std::vector<QrCodeEntry> qrCodes = {
-        {"Bruce AP",   "WIFI:T:WPA;S:BruceNet;P:brucenet;;"},
+        {"Bruce AP",   "WIFI:T:WPA;S:RiftHack;P:RiftHack;;"},
         {"Bruce Wiki", "https://github.com/pr3y/Bruce/wiki"},
         {"Bruce Site", "https://bruce.computer"            },
         {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"      }

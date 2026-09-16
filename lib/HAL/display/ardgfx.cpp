@@ -18,7 +18,7 @@ tft_display::tft_display(int16_t _W, int16_t _H) : _height(_H), _width(_W) {
     #if TFT_DISPLAY_DRIVER_N != 49
         #error "TFT_DATABUS_N=3 requires TFT_DISPLAY_DRIVER_N=49 (Arduino_RGB_Display)"
     #endif
-    bus = new Arduino_ESP32RGBPanel( // TFT_DATABUS(
+    Arduino_ESP32RGBPanel* rgbpanel = new Arduino_ESP32RGBPanel( // TFT_DATABUS(
         TFT_DE,
         TFT_VSYNC,
         TFT_HSYNC,
@@ -53,7 +53,8 @@ tft_display::tft_display(int16_t _W, int16_t _H) : _height(_H), _width(_W) {
     #if !defined(TFT_WIDTH) || !defined(TFT_HEIGHT)
         #error "Missing Macros definitions of: TFT_WIDTH, TFT_HEIGHT"
     #endif
-    _gfx = new TFT_DISPLAY_DRIVER(TFT_WIDTH, TFT_HEIGHT, bus, 0, true);
+    _gfx = new TFT_DISPLAY_DRIVER(TFT_WIDTH, TFT_HEIGHT, rgbpanel, 0, true);
+    bus = (Arduino_DataBus*)rgbpanel;
 #endif
 #if TFT_DATABUS_N == 0
     bus = new TFT_DATABUS(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO, &SPI);
@@ -107,6 +108,8 @@ tft_display::tft_display(int16_t _W, int16_t _H) : _height(_H), _width(_W) {
     );
 #elif TFT_DISPLAY_DRIVER_N >= 23 && TFT_DISPLAY_DRIVER_N <= 35
         _gfx = new TFT_DISPLAY_DRIVER(bus, TFT_RST, TFT_ROTATION, TFT_IPS);
+#elif TFT_DISPLAY_DRIVER_N == 49
+    // initialized earlier
 #else
     #if !defined(TFT_RST) || !defined(TFT_ROTATION) || !defined(TFT_IPS) || !defined(TFT_WIDTH) ||               \
         !defined(TFT_HEIGHT) || !defined(TFT_COL_OFS1) || !defined(TFT_ROW_OFS1) || !defined(TFT_COL_OFS2) ||    \

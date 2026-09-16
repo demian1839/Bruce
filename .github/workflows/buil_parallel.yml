@@ -95,6 +95,7 @@ jobs:
           - { env: "Awok-Touch",                      family: "ESP32",}
           - { env: "WaveSentry-R1",                   family: "ESP32",}
           - { env: "LAUNCHER_WaveSentry-R1",          family: "ESP32",}
+          - { env: "esp32p4_headless",                family: "ESP32-P4",}
 
     steps:
       - uses: actions/checkout@v4

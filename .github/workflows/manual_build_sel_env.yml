@@ -66,6 +66,7 @@ on:
           - "Awok-Touch"
           - "WaveSentry-R1"
           - "LAUNCHER_WaveSentry-R1"
+          - "esp32p4_headless"
 
 jobs:
   compile_selected:

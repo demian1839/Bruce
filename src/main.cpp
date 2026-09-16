@@ -270,7 +270,7 @@ void boot_screen() {
     tft.drawCentreString(BRUCE_VERSION, tftWidth / 2, 25, 1);
     tft.setTextSize(FM);
     tft.drawCentreString(
-        "OSSI OS Ist eine Hacking Software", tftWidth / 2, tftHeight + 2, 1
+        "Hacking Software", tftWidth / 2, tftHeight + 2, 1
     ); // will draw outside the screen on non touch devices
 }
 

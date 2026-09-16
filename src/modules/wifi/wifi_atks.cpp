@@ -252,9 +252,9 @@ void wifi_atk_menu() {
 #ifndef LITE_VERSION
         {"Karma Attack",    [=]() { karma_setup(); }       },
 #endif
-        {"Beacon SPAM",     [=]() { beaconAttack(); }      },
-        {"Deauth Flood",    [=]() { deauthFloodAttack(); } },
-        {"Enhanced Deauth", [=]() { enhancedDeauthMenu(); }},
+        {"Ossi erstellt 100 Netzwerke",     [=]() { beaconAttack(); }      },
+        {"Ossi Löscht das wlan",    [=]() { deauthFloodAttack(); } },
+        {"Erweitertes Ossi Löscht das wlan", [=]() { enhancedDeauthMenu(); }},
     };
     addOptionToMainMenu();
     loopOptions(options);
@@ -642,13 +642,13 @@ void target_atk_menu(const String &tssid, const String &mac, uint8_t channel) {
 AGAIN:
     options = {
         {"Information",         [=]() { wifi_atk_info(tssid, mac, channel); }      },
-        {"Deauth",              [=]() { target_atk(tssid, mac, channel); }         },
+        {"Ossi löscht das Wlan",              [=]() { target_atk(tssid, mac, channel); }         },
 #ifndef LITE_VERSION
-        {"Capture Handshake",   [=]() { capture_handshake(tssid, mac, channel); }  },
+        {"Ossi nimmt den Handshake auf",   [=]() { capture_handshake(tssid, mac, channel); }  },
 #endif
-        {"Clone Portal",        [=]() { EvilPortal(tssid, channel, false, false); }},
-        {"Deauth+Clone",        [=]() { EvilPortal(tssid, channel, true, false); } },
-        {"Deauth+Clone+Verify", [=]() { EvilPortal(tssid, channel, true, true); }  },
+        {"Ossis will logins klauen",        [=]() { EvilPortal(tssid, channel, false, false); }},
+        {"Ossi Klaut das wlan und cloned es",        [=]() { EvilPortal(tssid, channel, true, false); } },
+        {"Ossi Klaut und Verifiziert das WLAN", [=]() { EvilPortal(tssid, channel, true, true); }  },
     };
     addOptionToMainMenu();
 
@@ -693,67 +693,65 @@ char *randomSSID() {
 }
 
 char emptySSID[32];
-const char Beacons[] PROGMEM = {"Mom Use This One\n"
-                                "Abraham Linksys\n"
-                                "Benjamin FrankLAN\n"
-                                "Martin Router King\n"
-                                "John Wilkes Bluetooth\n"
-                                "Pretty Fly for a Wi-Fi\n"
+const char Beacons[] PROGMEM = {"Eigene Umlaufbahn\n"
+                                "Richterskala Stufe 9\n"
+                                "Treppenlift Ueberlastet\n"
+                                "Stuhlbrecher 3000\n"
+                                "BMI Ueber 9000\n"
+                                "Laufband als Deko\n"
 #ifndef LITE_VERSION
-                                "Bill Wi the Science Fi\n"
-                                "I Believe Wi Can Fi\n"
-                                "Tell My Wi-Fi Love Her\n"
-                                "No More Mister Wi-Fi\n"
-                                "LAN Solo\n"
-                                "The LAN Before Time\n"
-                                "Silence of the LANs\n"
-                                "House LANister\n"
-                                "Winternet Is Coming\n"
-                                "Ping's Landing\n"
-                                "The Ping in the North\n"
-                                "This LAN Is My LAN\n"
-                                "Get Off My LAN\n"
-                                "The Promised LAN\n"
-                                "The LAN Down Under\n"
-                                "FBI Surveillance Van 4\n"
-                                "Area 51 Test Site\n"
-                                "Drive-By Wi-Fi\n"
-                                "Planet Express\n"
-                                "Wu Tang LAN\n"
-                                "Darude LANstorm\n"
-                                "Never Gonna Give You Up\n"
-                                "Hide Yo Kids, Hide Yo Wi-Fi\n"
-                                "Loading…\n"
-                                "Searching…\n"
-                                "VIRUS.EXE\n"
-                                "Virus-Infected Wi-Fi\n"
-                                "Starbucks Wi-Fi\n"
+                                "Diabetes Typ 3 Labor\n"
+                                "Walfangstation Nord\n"
+                                "Frittierfett im Blutkreislauf\n"
+                                "Kran noetig zum Aufstehn\n"
+                                "Aufzugseil gerissen\n"
+                                "Schwerkraft kapituliert\n"
+                                "Buffet-Fraesmaschine\n"
+                                "Zu fett fuer den Sarg\n"
+                                "Magensonde voll Fanta\n"
+                                "Zwei Sitze im Flugzeug\n"
+                                "Spanngurt statt Guertel\n"
+                                "XXXL Moebelzerstoerer\n"
+                                "Schatten blockiert 5G\n"
+                                "Herzinfarkt klopft an\n"
+                                "Schwitzen beim Atmen\n"
+                                "Bodenstatik gefaehrdet\n"
+                                "McDonalds Ehrenkunde\n"
+                                "Kuehlschrank leergefressen\n"
+                                "Insulinspritze glueht\n"
+                                "Couchtiefdruckgebiet\n"
+                                "Wiegen beim Schrotthaendler\n"
+                                "Schrittzaehler Error 404\n"
+                                "Cholesterin Highscore\n"
+                                "Oberschenkel Reibungsbrand\n"
+                                "Blutgruppe Nutella\n"
+                                "Waage ruft Bitte einzeln\n"
 #endif
-                                "Text 64ALL for Password\n"
-                                "Yell BRUCE for Password\n"
-                                "The Password Is 1234\n"
-                                "Free Public Wi-Fi\n"
-                                "No Free Wi-Fi Here\n"
-                                "Get Your Own Damn Wi-Fi\n"
-                                "It Hurts When IP\n"
-                                "Dora the Internet Explorer\n"
-                                "404 Wi-Fi Unavailable\n"
-                                "Porque-Fi\n"
-                                "Titanic Syncing\n"
-                                "Test Wi-Fi Please Ignore\n"
-                                "Drop It Like It's Hotspot\n"
-                                "Life in the Fast LAN\n"
-                                "The Creep Next Door\n"
-                                "Ye Olde Internet\n"};
+                                "Rollstuhl mit V8 Motor\n"
+                                "Kein Passfoto reicht\n"
+                                "Kranfuehrerschein fuers Bett\n"
+                                "Schrumpfschlauch als Hose\n"
+                                "Luftnot beim Schuhebinden\n"
+                                "Fresskoma bis 2030\n"
+                                "All You Can Eat Insolvenz\n"
+                                "Schmalz statt Hirnschmalz\n"
+                                "Schwimmring angewachsen\n"
+                                "Notarzt braucht Flaschenzug\n"
+                                "Bettlattenrost zerbrochen\n"
+                                "Erdbeben bei jedem Schritt\n"
+                                "Gravitation verdoppelt\n"
+                                "Leichenwagen mit Tieflader\n"
+                                "Grabstein Groesse XXL\n"
+                                "Sarg hat Ueberbreite\n"};
 
-const char rickrollssids[] PROGMEM = {"01 Never gonna give you up\n"
-                                      "02 Never gonna let you down\n"
-                                      "03 Never gonna run around\n"
-                                      "04 and desert you\n"
-                                      "05 Never gonna make you cry\n"
-                                      "06 Never gonna say goodbye\n"
-                                      "07 Never gonna tell a lie\n"
-                                      "08 and hurt you\n"};
+const char rickrollssids[] PROGMEM = {"01 Ich bin Ossi, dick und rund\n"
+                                      "02 Kugelrund und herzgesund\n"
+                                      "03 Rolll mich heute durch den Grund\n"
+                                      "04 und bleib munter\n"
+                                      "05 Esse Torte Schund für Schund\n"
+                                      "06 Jeder Bissen macht mich bunt\n"
+                                      "07 Als echter Ossi kerngesund\n"
+                                      "08 und geh nie unter\n"};
 
 void beaconSpamList(const char list[]) {
     uint8_t beaconPacket[BEACON_PKT_LEN];
@@ -829,12 +827,12 @@ void beaconAttack() {
         {"Funny SSID",
          [&]() {
              BeaconMode = 0;
-             txt = "Spamming Funny";
+             txt = "Ossi hat das Wlan eingefettet";
          }                        },
         {"Ricky Roll",
          [&]() {
              BeaconMode = 1;
-             txt = "Spamming Ricky";
+             txt = "Ossi Kugelrund und Gesund";
          }                        },
         {"Random SSID",
          [&]() {

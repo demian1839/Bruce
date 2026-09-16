@@ -1,0 +1,14 @@
+# Target Configuration for ESP32-P4 with ESP32-C6 Hosted Co-Processor
+CONFIG_IDF_TARGET="esp32p4"
+CONFIG_ESP32P4_DEFAULT_CPU_FREQ_240=y
+
+# Wi-Fi / ESP-Hosted co-processor configuration (ESP32-C6 slave over SPI/SDIO)
+CONFIG_ESP_HOSTED_ENABLE=y
+CONFIG_ESP_HOSTED_INTERFACE_SPI=y
+
+# FreeRTOS Tick Rate (1000 Hz for low latency < 10 ms)
+CONFIG_FREERTOS_HZ=1000
+
+# ESP-NOW / Wi-Fi Stack Configurations
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=n
+CONFIG_ESP_WIFI_ENHANCED_LIGHT_SLEEP=n

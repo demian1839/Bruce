@@ -1,0 +1,56 @@
+name: Build ESP32-P4 / C6 & Elecrow Display Firmware
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ESP-IDF Firmware Binaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build ESP32-P4 Host Firmware
+        uses: espressif/esp-idf-action@v1
+        with:
+          esp_idf_version: v5.3
+          target: esp32p4
+          path: projects/p4_c6_host
+
+      - name: Build ESP32-C6 Co-Processor Firmware
+        uses: espressif/esp-idf-action@v1
+        with:
+          esp_idf_version: v5.3
+          target: esp32c6
+          path: projects/c6_espnow_coprocessor
+
+      - name: Build Elecrow Display Firmware (4MB)
+        uses: espressif/esp-idf-action@v1
+        with:
+          esp_idf_version: v5.3
+          target: esp32s3
+          path: projects/elecrow_display
+
+      - name: Upload ESP32-P4 Host Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32_p4_host_firmware
+          path: projects/p4_c6_host/build/*.bin
+
+      - name: Upload ESP32-C6 Co-Processor Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32_c6_coprocessor_firmware
+          path: projects/c6_espnow_coprocessor/build/*.bin
+
+      - name: Upload Elecrow Display Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elecrow_display_firmware
+          path: projects/elecrow_display/build/*.bin

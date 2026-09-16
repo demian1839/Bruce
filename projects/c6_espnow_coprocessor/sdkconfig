@@ -1,0 +1,9 @@
+# Target Configuration for Onboard ESP32-C6 Radio Co-Processor
+CONFIG_IDF_TARGET="esp32c6"
+
+# FreeRTOS Tick Rate (1000 Hz for low latency < 10 ms)
+CONFIG_FREERTOS_HZ=1000
+
+# ESP-NOW / Wi-Fi Stack Configurations
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=n
+CONFIG_ESP_WIFI_ENHANCED_LIGHT_SLEEP=n

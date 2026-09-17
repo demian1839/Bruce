@@ -2,6 +2,7 @@
 #include <globals.h>
 
 #include "core/bus_HAL.h"
+#include "core/connect/device_status.h"
 #include "core/powerSave.h"
 #include "core/ram_profile.h"
 #include "core/serial_commands/cli.h"
@@ -566,6 +567,7 @@ void setup() {
 #endif
     //  start a task to handle serial commands while the webui is running
     startSerialCommandsHandlerTask(true);
+    startDeviceStatus();
 
     wakeUpScreen();
     if (bruceConfig.startupApp != "" && !startupApp.startApp(bruceConfig.startupApp)) {

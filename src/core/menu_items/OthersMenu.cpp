@@ -1,5 +1,6 @@
 #include "OthersMenu.h"
 
+#include "core/connect/device_status.h"
 #include "core/display.h"
 #include "core/utils.h"
 #include "modules/badusb_ble/ducky_typer.h"
@@ -16,6 +17,7 @@ void OthersMenu::optionsMenu() {
     options = {
         {"QRCodes",      qrcode_menu                  },
         {"Megalodon",    shark_setup                  },
+        {"Geraetestatus", deviceStatusMenu            },
 
 #if defined(MIC_SPM1423) || defined(MIC_INMP441)
         {"Microphone",   [this]() { micMenu(); }      }, //@deveclipse

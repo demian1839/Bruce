@@ -61,6 +61,32 @@ keyStroke KeyStroke;
 
 volatile int32_t RotaryNetSteps = 0;
 
+#if defined(CROWPANEL_70)
+void InputHandler() {
+    uint16_t tx, ty;
+    if (tft.getTouch(&tx, &ty)) {
+        touchPoint.pressed = true;
+        touchPoint.x = tx;
+        touchPoint.y = ty;
+        AnyKeyPress = true;
+
+        // TouchFooter Navigation (untere 45 Pixel)
+        if (ty >= tftHeight) {
+            if (tx < (tftWidth / 3)) {
+                PrevPress = true;
+            } else if (tx < (2 * tftWidth / 3)) {
+                SelPress = true;
+            } else {
+                NextPress = true;
+            }
+        } else {
+            // Main-Screen-Tap: Auswahl bestaetigen
+            SelPress = true;
+        }
+    }
+}
+#endif
+
 #ifdef HAS_ENCODER
 // Default no-op: boards that define HAS_ENCODER but don't implement
 // pollEncoder() (shouldn't happen, but keeps the linker happy either way).
@@ -150,6 +176,13 @@ bool clock_set = false;
 std::vector<Option> options;
 // Protected global variables
 #if defined(HAS_SCREEN)
+#if defined(CROWPANEL_70)
+LGFX_CrowPanel70 tft;
+LGFX_Sprite sprite = LGFX_Sprite(&tft);
+LGFX_Sprite draw = LGFX_Sprite(&tft);
+volatile int tftWidth = 800;
+volatile int tftHeight = 480 - 45; // 45px fuer den TouchFooter
+#else
 tft_logger tft = tft_logger(); // Invoke custom library
 tft_sprite sprite = tft_sprite(&tft);
 tft_sprite draw = tft_sprite(&tft);
@@ -159,6 +192,7 @@ volatile int tftHeight =
     TFT_WIDTH - 20; // 20px to draw the TouchFooter(), were the btns are being read in touch devices.
 #else
 volatile int tftHeight = TFT_WIDTH;
+#endif
 #endif
 #else
 tft_logger tft;
@@ -202,7 +236,12 @@ void begin_storage() {
  **  Sets up a weak (empty) function to be replaced by /ports/* /interface.h
  *********************************************************************/
 void _setup_gpio() __attribute__((weak));
-void _setup_gpio() {}
+void _setup_gpio() {
+#if defined(CROWPANEL_70)
+    // USB-JTAG-Pads abklemmen, damit GPIO 19 & 20 als I2C (GT911) antworten[cite: 3]
+    CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_USB_PAD_ENABLE);
+#endif
+}
 
 /*********************************************************************
  **  Function: _post_setup_gpio()
@@ -248,13 +287,18 @@ void begin_tft() {
     tft.invertDisplay(bruceConfig.colorInverted);
     tft.setRotation(bruceConfigPins.rotation);
     tftWidth = tft.width();
-#ifdef HAS_TOUCH
+#if defined(CROWPANEL_70)
+    tftHeight = tft.height() - 45;
+#elif defined(HAS_TOUCH)
     tftHeight = tft.height() - 20;
 #else
     tftHeight = tft.height();
 #endif
     resetTftDisplay();
     setBrightness(bruceConfig.bright, false);
+#if defined(CROWPANEL_70)
+    tft.setBrightness(bruceConfig.bright);
+#endif
 }
 
 /*********************************************************************
@@ -520,6 +564,9 @@ void setup() {
     // Some board interfaces initialize or reset the backlight in post-setup,
     // so re-apply the stored brightness after that stage completes.
     setBrightness(bruceConfig.bright, false);
+#if defined(CROWPANEL_70)
+    tft.setBrightness(bruceConfig.bright);
+#endif
     // end of post gpio begin
 
     // #ifndef USE_TFT_eSPI_TOUCH

@@ -23,7 +23,7 @@ public:
       auto cfg = _bus_instance.config();
       cfg.panel = &_panel_instance;
 
-      // 16-Bit Parallelbus (B0..B4, G0..G5, R0..R4)
+      // Datenleitungen: B0..B4, G0..G5, R0..R4 (Deckungsgleich mit RiftOS)
       cfg.pin_d0  = 15; cfg.pin_d1  = 7;  cfg.pin_d2  = 6;  cfg.pin_d3  = 5;  cfg.pin_d4  = 4;
       cfg.pin_d5  = 9;  cfg.pin_d6  = 46; cfg.pin_d7  = 3;  cfg.pin_d8  = 8;  cfg.pin_d9  = 16; cfg.pin_d10 = 1;
       cfg.pin_d11 = 14; cfg.pin_d12 = 21; cfg.pin_d13 = 47; cfg.pin_d14 = 48; cfg.pin_d15 = 45;
@@ -36,7 +36,7 @@ public:
       cfg.freq_write = 12000000; // 12 MHz PCLK
       cfg.hsync_polarity = 0;
       cfg.vsync_polarity = 0;
-      cfg.pclk_idle_high = 1;
+      cfg.pclk_idle_high = 1;    // Daten auf fallender Flanke (RIFT_LCD_PCLK_NEG 1)
 
       _bus_instance.config(cfg);
     }
@@ -48,6 +48,7 @@ public:
       cfg.panel_width   = 800;
       cfg.panel_height  = 480;
 
+      // Gepruefte Timings aus RiftOS
       cfg.hsync_pulse_width = 48;
       cfg.hsync_back_porch  = 40;
       cfg.hsync_front_porch = 40;
@@ -59,7 +60,7 @@ public:
     }
 
     {
-      // Beleuchtung per PWM an GPIO 2
+      // Hintergrundbeleuchtung per PWM (GPIO 2, Channel 7, 44.1 kHz)
       auto cfg = _light_instance.config();
       cfg.pin_bl      = 2;
       cfg.invert      = false;
@@ -70,7 +71,7 @@ public:
     }
 
     {
-      // GT911 Touch
+      // GT911 Kapazitiver Touch (I2C SDA=19, SCL=20, Addr=0x5D)
       auto cfg = _touch_instance.config();
       cfg.x_min      = 0;
       cfg.x_max      = 799;
@@ -91,7 +92,6 @@ public:
     setPanel(&_panel_instance);
   }
 
-  // Kompatibilitätsmethoden für Bruce
   void setTextColor(uint32_t c) {
     _cur_textcolor = c;
     lgfx::LGFX_Device::setTextColor(c);

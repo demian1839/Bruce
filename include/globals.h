@@ -39,11 +39,18 @@ extern RTC_DateTypeDef _date;
 
 // Declaração dos objetos TFT
 #if defined(HAS_SCREEN)
+#if defined(CROWPANEL_70)
+#include "LGFX_CrowPanel70.hpp"
+extern LGFX_CrowPanel70 tft;
+extern LGFX_Sprite sprite;
+extern LGFX_Sprite draw;
+#else
 #include <display/tft.h>
 #include <tftLogger.h>
 extern tft_logger tft;
 extern tft_sprite sprite;
 extern tft_sprite draw;
+#endif
 #else
 #include <tftLogger.h>
 extern tft_logger tft;

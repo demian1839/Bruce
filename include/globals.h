@@ -141,7 +141,7 @@ struct keyStroke { // DO NOT CHANGE IT!!!!!
     bool del = false;
     bool enter = false;
     bool alt = false;
-    bool ctrl = false;
+    ctrl = false;
     bool gui = false;
     uint8_t modifiers = 0;
     std::vector<char> word;

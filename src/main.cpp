@@ -530,20 +530,7 @@ void loop() {
 #else
 void loop() {
     tft.setLogging();
-    Serial.println(
-        "\n"
-        "██████  ██████  ██    ██  ██████ ███████ \n"
-        "██   ██ ██   ██ ██    ██ ██      ██      \n"
-        "██████  ██████  ██    ██ ██      █████   \n"
-        "██   ██ ██   ██ ██    ██ ██      ██      \n"
-        "██████  ██   ██  ██████   ██████ ███████ \n"
-        "                                         \n"
-        "         PREDATORY FIRMWARE\n\n"
-        "Tips: Connect to the WebUI for better experience\n"
-        "      Add your network by sending: wifi add ssid password\n\n"
-        "At your command:"
-    );
-
+    Serial.println("\nPREDATORY FIRMWARE\n");
     tft.fillScreen(bruceConfig.bgColor);
     mainMenu.begin();
     vTaskDelay(10 / portTICK_PERIOD_MS);

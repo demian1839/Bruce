@@ -13,17 +13,18 @@ class LGFX_CrowPanel70 : public lgfx::LGFX_Device {
 
   uint32_t _cur_textcolor = 0xFFFF;
   uint32_t _cur_textbgcolor = 0x0000;
+  bool     _swapBytes = false;
 
 public:
   LGFX_CrowPanel70(void) {
-    // USB-JTAG-Pads freigeben, damit GPIO 19 & 20 als I2C laufen
+    // USB-JTAG-Pads freigeben, damit GPIO 19 & 20 als I2C (GT911) antworten
     CLEAR_PERI_REG_MASK(USB_SERIAL_JTAG_CONF0_REG, USB_SERIAL_JTAG_USB_PAD_ENABLE);
 
     {
       auto cfg = _bus_instance.config();
       cfg.panel = &_panel_instance;
 
-      // Datenleitungen: B0..B4, G0..G5, R0..R4 (Deckungsgleich mit RiftOS)
+      // 16-Bit Parallelbus (B0..B4, G0..G5, R0..R4)
       cfg.pin_d0  = 15; cfg.pin_d1  = 7;  cfg.pin_d2  = 6;  cfg.pin_d3  = 5;  cfg.pin_d4  = 4;
       cfg.pin_d5  = 9;  cfg.pin_d6  = 46; cfg.pin_d7  = 3;  cfg.pin_d8  = 8;  cfg.pin_d9  = 16; cfg.pin_d10 = 1;
       cfg.pin_d11 = 14; cfg.pin_d12 = 21; cfg.pin_d13 = 47; cfg.pin_d14 = 48; cfg.pin_d15 = 45;
@@ -36,7 +37,7 @@ public:
       cfg.freq_write = 12000000; // 12 MHz PCLK
       cfg.hsync_polarity = 0;
       cfg.vsync_polarity = 0;
-      cfg.pclk_idle_high = 1;    // Daten auf fallender Flanke (RIFT_LCD_PCLK_NEG 1)
+      cfg.pclk_idle_high = 1;
 
       _bus_instance.config(cfg);
     }
@@ -48,7 +49,6 @@ public:
       cfg.panel_width   = 800;
       cfg.panel_height  = 480;
 
-      // Gepruefte Timings aus RiftOS
       cfg.hsync_pulse_width = 48;
       cfg.hsync_back_porch  = 40;
       cfg.hsync_front_porch = 40;
@@ -92,6 +92,7 @@ public:
     setPanel(&_panel_instance);
   }
 
+  // Kompatibilitaetsmethoden fuer Bruce
   void setTextColor(uint32_t c) {
     _cur_textcolor = c;
     lgfx::LGFX_Device::setTextColor(c);
@@ -103,7 +104,42 @@ public:
   }
   uint32_t getTextColor(void) const { return _cur_textcolor; }
   uint32_t getTextBgColor(void) const { return _cur_textbgcolor; }
+
+  bool getSwapBytes(void) const { return _swapBytes; }
+  void setSwapBytes(bool swap) {
+    _swapBytes = swap;
+    lgfx::LGFX_Device::setSwapBytes(swap);
+  }
+
   void writecommand(uint8_t) {}
   void setSleepMode(bool) {}
   void imageToBin(uint8_t, const String&, int, int, bool, int) {}
+
+  void drawWideLine(float x0, float y0, float x1, float y1, float wd, uint32_t fg_color, uint32_t bg_color = 0) {
+    int w = (int)(wd + 0.5f);
+    if (w <= 1) {
+      drawLine((int32_t)x0, (int32_t)y0, (int32_t)x1, (int32_t)y1, fg_color);
+    } else {
+      for (int i = -w / 2; i <= w / 2; ++i) {
+        drawLine((int32_t)(x0 + i), (int32_t)y0, (int32_t)(x1 + i), (int32_t)y1, fg_color);
+        drawLine((int32_t)x0, (int32_t)(y0 + i), (int32_t)x1, (int32_t)(y1 + i), fg_color);
+      }
+    }
+  }
+
+  int32_t drawRightString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+    return lgfx::LGFX_Device::drawRightString(str.c_str(), dX, dY, font);
+  }
+  int32_t drawCentreString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+    return lgfx::LGFX_Device::drawCenterString(str.c_str(), dX, dY, font);
+  }
+  int32_t drawCentreString(const char* str, int32_t dX, int32_t dY, uint8_t font) {
+    return lgfx::LGFX_Device::drawCenterString(str, dX, dY, font);
+  }
+  int32_t drawString(const String& str, int32_t dX, int32_t dY) {
+    return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY);
+  }
+  int32_t drawString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+    return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY, font);
+  }
 };

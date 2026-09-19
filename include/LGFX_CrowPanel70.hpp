@@ -337,6 +337,35 @@ public:
 #define MAX_LOG_IMG_PATH 512
 #endif
 
+#ifndef __TFT_FUNCS_DEFINED__
+#define __TFT_FUNCS_DEFINED__
+enum tftFuncs : uint8_t {
+    FILLSCREEN,           // 0
+    DRAWRECT,             // 1
+    FILLRECT,             // 2
+    DRAWROUNDRECT,        // 3
+    FILLROUNDRECT,        // 4
+    DRAWCIRCLE,           // 5
+    FILLCIRCLE,           // 6
+    DRAWTRIAGLE,          // 7
+    FILLTRIANGLE,         // 8
+    DRAWELIPSE,           // 9
+    FILLELIPSE,           // 10
+    DRAWLINE,             // 11
+    DRAWARC,              // 12
+    DRAWWIDELINE,         // 13
+    DRAWCENTRESTRING,     // 14
+    DRAWRIGHTSTRING,      // 15
+    DRAWSTRING,           // 16
+    PRINT,                // 17
+    DRAWIMAGE,            // 18
+    DRAWPIXEL,            // 19
+    DRAWFASTVLINE,        // 20
+    DRAWFASTHLINE,        // 21
+    SCREEN_INFO = 99      // 99
+};
+#endif
+
 class tft_logger : public LGFX_CrowPanel70 {
 public:
   using LGFX_CrowPanel70::LGFX_CrowPanel70;
@@ -350,6 +379,10 @@ public:
   void stopAsyncSerial() {}
   void getTftInfo() {}
   void restoreLogger() {}
+  void log_drawString(const String &s, tftFuncs fn, int32_t x, int32_t y) {
+    (void)s; (void)fn; (void)x; (void)y;
+  }
+  void log_print(const String &s) { (void)s; }
 };
 
 using tft_sprite = CrowPanel_Sprite;

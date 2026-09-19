@@ -2,6 +2,10 @@
 #define LIB_HAL_DISPLAY_TFT_H
 #include <pins_arduino.h>
 
+#if defined(CROWPANEL_70)
+#include <LGFX_CrowPanel70.hpp>
+#else
+
 #if !defined(USE_ARDUINO_GFX) && !defined(USE_LOVYANGFX) && !defined(USE_TFT_ESPI) && !defined(USE_M5GFX)
 #define USE_TFT_ESPI
 #endif
@@ -23,4 +27,5 @@ class tft_logger;
 #include "m5gfx.h"
 
 #endif
+#endif // CROWPANEL_70
 #endif // LIB_HAL_DISPLAY_TFT_H

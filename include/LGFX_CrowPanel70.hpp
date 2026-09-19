@@ -229,6 +229,14 @@ public:
     lgfx::LGFX_Device::fillRect(x, y, w, h, (uint16_t)color1);
   }
 
+  using lgfx::LGFX_Device::pushImage;
+
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint16_t *data) {
+    lgfx::LGFX_Device::pushImage(x, y, w, h, data);
+  }
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t *data) {
+    lgfx::LGFX_Device::pushImage(x, y, w, h, (const uint16_t *)data);
+  }
   void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *data, bool bpp8, const uint16_t *cmap) {
     if (!data || !bpp8 || !cmap) return;
     for (int32_t row = 0; row < h; ++row) {
@@ -274,6 +282,14 @@ public:
   }
   void pushToSprite(CrowPanel_Sprite *dest, int32_t x, int32_t y, uint32_t transparent = 0x00FFFFFF) {
     lgfx::LGFX_Sprite::pushSprite(static_cast<lgfx::LGFX_Sprite *>(dest), x, y, (uint16_t)transparent);
+  }
+  using lgfx::LGFX_Sprite::pushImage;
+
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint16_t *data) {
+    lgfx::LGFX_Sprite::pushImage(x, y, w, h, data);
+  }
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t *data) {
+    lgfx::LGFX_Sprite::pushImage(x, y, w, h, (const uint16_t *)data);
   }
   void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *data, bool bpp8, const uint16_t *cmap) {
     if (!data || !bpp8 || !cmap) return;

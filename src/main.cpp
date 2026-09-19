@@ -408,9 +408,17 @@ void setup() {
     BLEConnected = false;
     bruceConfig.bright = 100;
     bruceConfigPins.rotation = ROTATION;
+    Serial.println("[BOOT] setup_gpio...");
+    Serial.flush();
     setup_gpio();
+    Serial.println("[BOOT] setup_gpio done");
+    Serial.flush();
 #if defined(HAS_SCREEN)
+    Serial.println("[BOOT] tft.init...");
+    Serial.flush();
     tft.init();
+    Serial.println("[BOOT] tft.init done");
+    Serial.flush();
     tft.setRotation(bruceConfigPins.rotation);
     tft.fillScreen(TFT_BLACK);
     tft.setTextColor(TFT_PURPLE, TFT_BLACK);
@@ -419,10 +427,16 @@ void setup() {
 #else
     tft.begin();
 #endif
+    Serial.println("[BOOT] storage...");
+    Serial.flush();
     _pre_storage_gpio();
     begin_storage();
     RAM_LOG("after-storage");
+    Serial.println("[BOOT] begin_tft...");
+    Serial.flush();
     begin_tft();
+    Serial.println("[BOOT] init_clock...");
+    Serial.flush();
     init_clock();
     init_led();
     RAM_LOG("after-tft-clock-led");

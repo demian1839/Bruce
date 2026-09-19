@@ -94,9 +94,10 @@ public:
       cfg.freq       = 400000;
       cfg.bus_shared = false;
       _touch_instance.config(cfg);
-      _panel_instance.touch(&_touch_instance);
+      _panel_instance.setTouch(&_touch_instance);
     }
 
+    _panel_instance.setBus(&_bus_instance);
     setPanel(&_panel_instance);
   }
 

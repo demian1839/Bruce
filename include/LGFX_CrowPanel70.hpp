@@ -37,7 +37,7 @@ public:
       cfg.pin_hsync   = 39; // HSYNC
       cfg.pin_pclk    = 0;  // PCLK
 
-      cfg.freq_write = 12000000; // 12 MHz PCLK
+      cfg.freq_write = 24000000; // 24 MHz PCLK (Elecrow V3.0, quelle: riftos rift_config.h)
       cfg.hsync_polarity    = 0;
       cfg.hsync_front_porch = 40;
       cfg.hsync_pulse_width = 48;

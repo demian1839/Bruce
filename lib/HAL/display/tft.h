@@ -3,7 +3,7 @@
 #include <pins_arduino.h>
 
 #if defined(CROWPANEL_70)
-#include <LGFX_CrowPanel70.hpp>
+#include "../../../include/LGFX_CrowPanel70.hpp"
 #else
 
 #if !defined(USE_ARDUINO_GFX) && !defined(USE_LOVYANGFX) && !defined(USE_TFT_ESPI) && !defined(USE_M5GFX)

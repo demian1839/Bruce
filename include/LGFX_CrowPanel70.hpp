@@ -11,9 +11,12 @@ class LGFX_CrowPanel70 : public lgfx::LGFX_Device {
   lgfx::Light_PWM   _light_instance;
   lgfx::Touch_GT911 _touch_instance;
 
-  uint32_t _cur_textcolor = 0xFFFF;
+  uint32_t _cur_textcolor   = 0xFFFF;
   uint32_t _cur_textbgcolor = 0x0000;
-  bool     _swapBytes = false;
+  bool     _swapBytes       = false;
+  uint8_t  _cur_textsize    = 1;
+  uint8_t  _cur_textdatum   = 0;
+  uint8_t  _cur_rotation    = 0;
 
 public:
   LGFX_CrowPanel70(void) {
@@ -105,10 +108,46 @@ public:
   uint32_t getTextColor(void) const { return _cur_textcolor; }
   uint32_t getTextBgColor(void) const { return _cur_textbgcolor; }
 
+  void setTextSize(uint8_t s) {
+    _cur_textsize = s ? s : 1;
+    lgfx::LGFX_Device::setTextSize(_cur_textsize);
+  }
+  uint8_t getTextSize(void) const { return _cur_textsize; }
+
+  void setTextDatum(uint8_t d) {
+    _cur_textdatum = d;
+    lgfx::LGFX_Device::setTextDatum(d);
+  }
+  uint8_t getTextDatum(void) const { return _cur_textdatum; }
+
+  void setRotation(uint8_t r) {
+    _cur_rotation = r;
+    lgfx::LGFX_Device::setRotation(r);
+  }
+  uint8_t getRotation(void) const { return _cur_rotation; }
+
+  int16_t fontHeight(int16_t font = 1) const {
+    (void)font;
+    return lgfx::LGFX_Device::fontHeight();
+  }
+
+  int16_t textWidth(const String& s, uint8_t font = 1) const {
+    (void)font;
+    return lgfx::LGFX_Device::textWidth(s.c_str());
+  }
+  int16_t textWidth(const char* s, uint8_t font = 1) const {
+    (void)font;
+    return lgfx::LGFX_Device::textWidth(s);
+  }
+
   bool getSwapBytes(void) const { return _swapBytes; }
   void setSwapBytes(bool swap) {
     _swapBytes = swap;
     lgfx::LGFX_Device::setSwapBytes(swap);
+  }
+
+  uint16_t color565(uint8_t r, uint8_t g, uint8_t b) const {
+    return lgfx::LGFX_Device::color565(r, g, b);
   }
 
   void writecommand(uint8_t) {}
@@ -127,19 +166,71 @@ public:
     }
   }
 
-  int32_t drawRightString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+  int32_t drawRightString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
     return lgfx::LGFX_Device::drawRightString(str.c_str(), dX, dY, font);
   }
-  int32_t drawCentreString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+  int32_t drawRightString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
+    return lgfx::LGFX_Device::drawRightString(str, dX, dY, font);
+  }
+
+  int32_t drawCentreString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
     return lgfx::LGFX_Device::drawCenterString(str.c_str(), dX, dY, font);
   }
-  int32_t drawCentreString(const char* str, int32_t dX, int32_t dY, uint8_t font) {
+  int32_t drawCentreString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
     return lgfx::LGFX_Device::drawCenterString(str, dX, dY, font);
   }
-  int32_t drawString(const String& str, int32_t dX, int32_t dY) {
-    return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY);
-  }
-  int32_t drawString(const String& str, int32_t dX, int32_t dY, uint8_t font) {
+
+  int32_t drawString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
     return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY, font);
   }
+  int32_t drawString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
+    return lgfx::LGFX_Device::drawString(str, dX, dY, font);
+  }
+
+  void fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
+    (void)color2;
+    lgfx::LGFX_Device::fillRect(x, y, w, h, (uint16_t)color1);
+  }
+  void fillRectVGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
+    (void)color2;
+    lgfx::LGFX_Device::fillRect(x, y, w, h, (uint16_t)color1);
+  }
+
+  void setBrightness(uint8_t b) {
+    _light_instance.setBrightness(b);
+  }
+
+  SPIClass &getSPIinstance() const {
+    static SPIClass dummySPI(FSPI);
+    return dummySPI;
+  }
 };
+
+class CrowPanel_Sprite : public lgfx::LGFX_Sprite {
+public:
+  using lgfx::LGFX_Sprite::LGFX_Sprite;
+  void fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
+    (void)color2;
+    lgfx::LGFX_Sprite::fillRect(x, y, w, h, (uint16_t)color1);
+  }
+  void fillRectVGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
+    (void)color2;
+    lgfx::LGFX_Sprite::fillRect(x, y, w, h, (uint16_t)color1);
+  }
+};
+
+class tft_logger : public LGFX_CrowPanel70 {
+public:
+  using LGFX_CrowPanel70::LGFX_CrowPanel70;
+  void setLogging(bool _log = true) { (void)_log; }
+  void getBinLog(uint8_t *outBuffer, size_t &outSize) { (void)outBuffer; outSize = 0; }
+  void clearLog() {}
+  void addLogEntry(const uint8_t *buffer, uint8_t size) { (void)buffer; (void)size; }
+  void startAsyncSerial() {}
+  void stopAsyncSerial() {}
+  void getTftInfo() {}
+  void restoreLogger() {}
+};
+
+using LGFX_Sprite = CrowPanel_Sprite;
+using tft_sprite = CrowPanel_Sprite;

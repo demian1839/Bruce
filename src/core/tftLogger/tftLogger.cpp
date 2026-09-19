@@ -1,3 +1,4 @@
+#if !defined(CROWPANEL_70)
 #include <cstddef>
 #include <esp32-hal-psram.h>
 #include <globals.h>
@@ -603,3 +604,4 @@ size_t tft_logger::printf(const char *format, ...) {
     va_end(args);
     return print(String(buf));
 }
+#endif

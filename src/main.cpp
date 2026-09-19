@@ -166,9 +166,9 @@ std::vector<Option> options;
 // Protected global variables
 #if defined(HAS_SCREEN)
 #if defined(CROWPANEL_70)
-LGFX_CrowPanel70 tft;
-LGFX_Sprite sprite = LGFX_Sprite(&tft);
-LGFX_Sprite draw = LGFX_Sprite(&tft);
+tft_logger tft;
+tft_sprite sprite = tft_sprite(&tft);
+tft_sprite draw = tft_sprite(&tft);
 volatile int tftWidth = 800;
 volatile int tftHeight = 480 - 45; // 45px fuer den TouchFooter
 #else

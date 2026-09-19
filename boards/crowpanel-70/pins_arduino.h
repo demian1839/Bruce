@@ -13,6 +13,15 @@ static const uint8_t RX = 44;
 static const uint8_t SDA = 19;
 static const uint8_t SCL = 20;
 
+#define GROVE_SDA 19
+#define GROVE_SCL 20
+
+#define BAD_TX 43
+#define BAD_RX 44
+
+#define SERIAL_TX 43
+#define SERIAL_RX 44
+
 static const uint8_t SS   = 10;
 static const uint8_t MOSI = 11;
 static const uint8_t MISO = 13;

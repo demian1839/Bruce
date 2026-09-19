@@ -172,6 +172,15 @@ public:
   void setSleepMode(bool) {}
   void imageToBin(uint8_t, const String&, int, int, bool, int) {}
 
+  void drawArc(
+      int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color,
+      uint32_t bg_color = 0, bool smoothArc = true
+  ) {
+      (void)bg_color;
+      (void)smoothArc;
+      lgfx::LGFX_Device::fillArc(x, y, r, ir, startAngle + 90, endAngle + 90, (uint16_t)fg_color);
+  }
+
   void drawWideLine(float x0, float y0, float x1, float y1, float wd, uint32_t fg_color, uint32_t bg_color = 0) {
     int w = (int)(wd + 0.5f);
     if (w <= 1) {
@@ -240,6 +249,18 @@ public:
   void fillRectVGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
     (void)color2;
     lgfx::LGFX_Sprite::fillRect(x, y, w, h, (uint16_t)color1);
+  }
+  void drawArc(
+      int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color,
+      uint32_t bg_color = 0, bool smoothArc = true
+  ) {
+      (void)bg_color;
+      (void)smoothArc;
+      lgfx::LGFX_Sprite::fillArc(x, y, r, ir, startAngle + 90, endAngle + 90, (uint16_t)fg_color);
+  }
+  void drawWideLine(float x0, float y0, float x1, float y1, float wd, uint32_t fg_color, uint32_t bg_color = 0) {
+    (void)bg_color;
+    lgfx::LGFX_Sprite::drawWideLine(x0, y0, x1, y1, wd, (uint16_t)fg_color);
   }
 };
 

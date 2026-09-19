@@ -63,25 +63,45 @@ volatile int32_t RotaryNetSteps = 0;
 
 #if defined(CROWPANEL_70)
 void InputHandler() {
-    uint16_t tx, ty;
-    if (tft.getTouch(&tx, &ty)) {
-        touchPoint.pressed = true;
-        touchPoint.x = tx;
-        touchPoint.y = ty;
-        AnyKeyPress = true;
+    static bool wasTouched = false;
+    static unsigned long lastTouchReleaseTime = 0;
+    static unsigned long lastPollTime = 0;
 
-        // TouchFooter Navigation (untere 45 Pixel)
-        if (ty >= tftHeight) {
-            if (tx < (tftWidth / 3)) {
-                PrevPress = true;
-            } else if (tx < (2 * tftWidth / 3)) {
-                SelPress = true;
-            } else {
-                NextPress = true;
+    if (millis() - lastPollTime < 20) {
+        return;
+    }
+    lastPollTime = millis();
+
+    uint16_t tx, ty;
+    bool isTouched = tft.getTouch(&tx, &ty);
+
+    if (isTouched) {
+        if (!wasTouched && (millis() - lastTouchReleaseTime > 150)) {
+            wasTouched = true;
+            if (!wakeUpScreen()) {
+                touchPoint.pressed = true;
+                touchPoint.x = tx;
+                touchPoint.y = ty;
+                AnyKeyPress = true;
+
+                // TouchFooter Navigation (untere 45 Pixel)
+                if (ty >= tftHeight) {
+                    if (tx < (tftWidth / 3)) {
+                        PrevPress = true;
+                    } else if (tx < (2 * tftWidth / 3)) {
+                        SelPress = true;
+                    } else {
+                        NextPress = true;
+                    }
+                } else {
+                    touchHeatMap(touchPoint);
+                }
             }
-        } else {
-            // Main-Screen-Tap: Auswahl bestaetigen
-            SelPress = true;
+        }
+    } else {
+        if (wasTouched) {
+            wasTouched = false;
+            lastTouchReleaseTime = millis();
         }
     }
 }

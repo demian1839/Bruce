@@ -46,7 +46,9 @@ public:
       cfg.vsync_front_porch = 1;
       cfg.vsync_pulse_width = 31;
       cfg.vsync_back_porch  = 13;
-      cfg.pclk_idle_high    = 1;
+      cfg.pclk_idle_high    = 0;
+      cfg.pclk_active_neg   = 1;
+      cfg.de_idle_high      = 0;
 
       _bus_instance.config(cfg);
     }

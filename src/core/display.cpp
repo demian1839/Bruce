@@ -66,12 +66,18 @@ void displayScrollingText(const String &text, Opt_Coord &coord, bool highlight) 
 ***************************************************************************************/
 void TouchFooter(uint16_t color) {
 #if defined(HAS_TOUCH)
-    tft.drawRoundRect(5, tftHeight + 2, tftWidth - 10, 43, 5, color);
+    int btnH = (tftWidth >= 480) ? 43 : 18;
+    int btnY = tftHeight + 2;
+    int textY = (tftWidth >= 480) ? (btnY + 12) : (btnY + 2);
+    int txtSize = (tftWidth >= 480) ? FM : FP;
+    tft.drawRoundRect(4, btnY, tftWidth - 8, btnH, (tftWidth >= 480) ? 6 : 3, color);
+    tft.drawFastVLine(tftWidth / 3, btnY, btnH, color);
+    tft.drawFastVLine(2 * tftWidth / 3, btnY, btnH, color);
     tft.setTextColor(color);
-    tft.setTextSize(FM);
-    tft.drawCentreString("PREV", tftWidth / 6, tftHeight + 4, 1);
-    tft.drawCentreString("SEL", tftWidth / 2, tftHeight + 4, 1);
-    tft.drawCentreString("NEXT", 5 * tftWidth / 6, tftHeight + 4, 1);
+    tft.setTextSize(txtSize);
+    tft.drawCentreString("< PREV", tftWidth / 6, textY, 1);
+    tft.drawCentreString("OK", tftWidth / 2, textY, 1);
+    tft.drawCentreString("NEXT >", 5 * tftWidth / 6, textY, 1);
 #endif
 }
 /***************************************************************************************
@@ -79,12 +85,18 @@ void TouchFooter(uint16_t color) {
 ** Description:   Draw touch screen footer
 ***************************************************************************************/
 void MegaFooter(uint16_t color) {
-    tft.drawRoundRect(5, tftHeight + 2, tftWidth - 10, 43, 5, color);
+    int btnH = (tftWidth >= 480) ? 43 : 18;
+    int btnY = tftHeight + 2;
+    int textY = (tftWidth >= 480) ? (btnY + 12) : (btnY + 2);
+    int txtSize = (tftWidth >= 480) ? FM : FP;
+    tft.drawRoundRect(4, btnY, tftWidth - 8, btnH, (tftWidth >= 480) ? 6 : 3, color);
+    tft.drawFastVLine(tftWidth / 3, btnY, btnH, color);
+    tft.drawFastVLine(2 * tftWidth / 3, btnY, btnH, color);
     tft.setTextColor(color);
-    tft.setTextSize(FM);
-    tft.drawCentreString("Exit", tftWidth / 6, tftHeight + 4, 1);
-    tft.drawCentreString("UP", tftWidth / 2, tftHeight + 4, 1);
-    tft.drawCentreString("DOWN", 5 * tftWidth / 6, tftHeight + 4, 1);
+    tft.setTextSize(txtSize);
+    tft.drawCentreString("Exit", tftWidth / 6, textY, 1);
+    tft.drawCentreString("UP", tftWidth / 2, textY, 1);
+    tft.drawCentreString("DOWN", 5 * tftWidth / 6, textY, 1);
 }
 
 /***************************************************************************************

@@ -1,4 +1,4 @@
-name: Build CrowPanel 7.0 Firmware
+name: Build CrowPanel 7.0 & CYD-2USB Firmware
 
 on:
   push:
@@ -38,27 +38,43 @@ jobs:
           path: |
             ~/.platformio
             .pio
-          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini', '**/boards/crowpanel-70.ini') }}
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini', '**/boards/crowpanel-70.ini', '**/boards/CYD-2432S028/CYD-2432S028.ini') }}
           restore-keys: |
             ${{ runner.os }}-pio-
 
-      - name: Firmware kompilieren
+      - name: Firmware kompilieren (CrowPanel 7.0 & CYD-2USB)
         run: |
-          pio run -e crowpanel-70
+          pio run -e crowpanel-70 -e CYD-2USB
 
-      - name: Binaries zu einem Flash-Image zusammenfuegen (Merged Bin)
+      - name: Binaries zu Flash-Images zusammenfuegen (Merged Bin)
         run: |
-          cd .pio/build/crowpanel-70
-          python -m esptool --chip esp32s3 merge_bin \
-            -o bruce_crowpanel70_merged.bin \
-            --flash_mode dio \
-            --flash_size 4MB \
-            0x0 bootloader.bin \
-            0x8000 partitions.bin \
-            0x10000 firmware.bin
-          ls -la
+          # CrowPanel 7.0 (ESP32-S3: bootloader @ 0x0)
+          if [ -d ".pio/build/crowpanel-70" ]; then
+            cd .pio/build/crowpanel-70
+            python -m esptool --chip esp32s3 merge_bin \
+              -o bruce_crowpanel70_merged.bin \
+              --flash_mode dio \
+              --flash_size 4MB \
+              0x0 bootloader.bin \
+              0x8000 partitions.bin \
+              0x10000 firmware.bin
+            cd ../../..
+          fi
 
-      - name: Firmware-Artefakt hochladen
+          # CYD-2USB (ESP32: bootloader @ 0x1000)
+          if [ -d ".pio/build/CYD-2USB" ]; then
+            cd .pio/build/CYD-2USB
+            python -m esptool --chip esp32 merge_bin \
+              -o bruce_CYD2USB_merged.bin \
+              --flash_mode dio \
+              --flash_size 4MB \
+              0x1000 bootloader.bin \
+              0x8000 partitions.bin \
+              0x10000 firmware.bin
+            cd ../../..
+          fi
+
+      - name: CrowPanel 7.0 Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
           name: bruce-crowpanel70-firmware
@@ -67,4 +83,15 @@ jobs:
             .pio/build/crowpanel-70/bootloader.bin
             .pio/build/crowpanel-70/partitions.bin
             .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin
+          retention-days: 14
+
+      - name: CYD-2USB Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: bruce-CYD-2USB-firmware
+          path: |
+            .pio/build/CYD-2USB/firmware.bin
+            .pio/build/CYD-2USB/bootloader.bin
+            .pio/build/CYD-2USB/partitions.bin
+            .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin
           retention-days: 14

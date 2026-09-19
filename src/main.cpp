@@ -277,6 +277,7 @@ void begin_tft() {
 }
 
 void boot_screen() {
+    tft.fillScreen(bruceConfig.bgColor);
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.setTextSize(FM);
     tft.drawPixel(0, 0, bruceConfig.bgColor);
@@ -284,14 +285,12 @@ void boot_screen() {
     tft.setTextSize(FP);
     tft.drawCentreString(BRUCE_VERSION, tftWidth / 2, 25, 1);
     tft.setTextSize(FM);
-    tft.drawCentreString("PREDATORY FIRMWARE", tftWidth / 2, tftHeight + 2, 1);
+    tft.drawCentreString("Edited by Demian & Talip", tftWidth / 2, tftHeight + 2, 1);
 }
 
 void boot_screen_anim() {
-    boot_screen();
-    int i = millis();
+    int start_time = millis();
     int boot_img = 0;
-    bool drawn = false;
     if (sdcardMounted) {
         if (SD.exists("/boot.jpg")) boot_img = 1;
         else if (SD.exists("/boot.gif")) boot_img = 3;
@@ -300,44 +299,170 @@ void boot_screen_anim() {
     else if (boot_img == 0 && LittleFS.exists("/boot.gif")) boot_img = 4;
     if (bruceConfig.theme.boot_img) boot_img = 5;
 
-    tft.drawPixel(0, 0, 0);
-    while (millis() < i + 7000) {
-        if ((millis() - i > 2000) && !drawn) {
-            tft.fillRect(0, 45, tftWidth, tftHeight - 45, bruceConfig.bgColor);
-            if (boot_img > 0 && !drawn) {
-                tft.fillScreen(bruceConfig.bgColor);
-                if (boot_img == 5) {
-                    drawImg(*bruceConfig.themeFS(), bruceConfig.getThemeItemImg(bruceConfig.theme.paths.boot_img), 0, 0, true, 3600);
-                } else if (boot_img == 1) {
-                    drawImg(SD, "/boot.jpg", 0, 0, true);
-                } else if (boot_img == 2) {
-                    drawImg(LittleFS, "/boot.jpg", 0, 0, true);
-                } else if (boot_img == 3) {
-                    drawImg(SD, "/boot.gif", 0, 0, true, 3600);
-                } else if (boot_img == 4) {
-                    drawImg(LittleFS, "/boot.gif", 0, 0, true, 3600);
-                }
-                tft.drawPixel(0, 0, 0);
-            }
-            drawn = true;
+    // Falls benutzerdefiniertes Bild vorhanden ist, dieses anzeigen
+    if (boot_img > 0) {
+        tft.fillScreen(bruceConfig.bgColor);
+        if (boot_img == 5) {
+            drawImg(*bruceConfig.themeFS(), bruceConfig.getThemeItemImg(bruceConfig.theme.paths.boot_img), 0, 0, true, 3600);
+        } else if (boot_img == 1) {
+            drawImg(SD, "/boot.jpg", 0, 0, true);
+        } else if (boot_img == 2) {
+            drawImg(LittleFS, "/boot.jpg", 0, 0, true);
+        } else if (boot_img == 3) {
+            drawImg(SD, "/boot.gif", 0, 0, true, 3600);
+        } else if (boot_img == 4) {
+            drawImg(LittleFS, "/boot.gif", 0, 0, true, 3600);
         }
-#if !defined(LITE_VERSION)
-        if (!boot_img && (millis() - i > 2200) && (millis() - i) < 2700)
-            tft.drawRect(2 * tftWidth / 3, tftHeight / 2, 2, 2, bruceConfig.priColor);
-        if (!boot_img && (millis() - i > 2700) && (millis() - i) < 2900)
-            tft.fillRect(0, 45, tftWidth, tftHeight - 45, bruceConfig.bgColor);
-        if (!boot_img && (millis() - i > 2900) && (millis() - i) < 3400)
-            tft.drawXBitmap(2 * tftWidth / 3 - 30, 5 + tftHeight / 2, bruce_small_bits, bruce_small_width, bruce_small_height, bruceConfig.bgColor, bruceConfig.priColor);
-        if (!boot_img && (millis() - i > 3400) && (millis() - i) < 3600) tft.fillScreen(bruceConfig.bgColor);
-        if (!boot_img && (millis() - i > 3600))
-            tft.drawXBitmap((tftWidth - 238) / 2, (tftHeight - 133) / 2, bits, bits_width, bits_height, bruceConfig.bgColor, bruceConfig.priColor);
-#endif
-        if (check(AnyKeyPress)) {
-            tft.fillScreen(bruceConfig.bgColor);
-            delay(10);
-            return;
+        while (millis() - start_time < 3500) {
+            if (check(AnyKeyPress)) break;
+            delay(50);
+        }
+        tft.fillScreen(bruceConfig.bgColor);
+        return;
+    }
+
+    // High-Tech Cyber Boot Animation: "Bruce - Edited by Demian & Talip"
+    tft.fillScreen(TFT_BLACK);
+
+    int cx = tftWidth / 2;
+    int cy = tftHeight / 2;
+    bool isWide = (tftWidth >= 480);
+
+    uint16_t neonCyan = 0x07FF;   // Vivid Cyan
+    uint16_t neonGreen = 0x07E0;  // Matrix Green
+    uint16_t darkGray = 0x2104;   // Dark Tech Gray
+    uint16_t midGray = 0x4A69;    // Medium Gray
+    uint16_t accent = bruceConfig.priColor ? bruceConfig.priColor : neonCyan;
+
+    // 1. HUD Corner Reticles
+    int brk = isWide ? 28 : 14;
+    auto drawHUDCorners = [&](uint16_t c) {
+        tft.drawFastHLine(6, 6, brk, c);
+        tft.drawFastVLine(6, 6, brk, c);
+        tft.drawFastHLine(tftWidth - 6 - brk, 6, brk, c);
+        tft.drawFastVLine(tftWidth - 7, 6, brk, c);
+        tft.drawFastHLine(6, tftHeight - 7, brk, c);
+        tft.drawFastVLine(6, tftHeight - 6 - brk, brk, c);
+        tft.drawFastHLine(tftWidth - 6 - brk, tftHeight - 7, brk, c);
+        tft.drawFastVLine(tftWidth - 7, tftHeight - 6 - brk, brk, c);
+    };
+    drawHUDCorners(darkGray);
+
+    // Header tag
+    tft.setTextColor(midGray, TFT_BLACK);
+    tft.setTextSize(FP);
+    tft.drawCentreString("// SYSTEM BOOT //", cx, isWide ? 14 : 8, 1);
+
+    // 2. Animated Center Cyber Box & Laser Scan Beam
+    int boxW = isWide ? 500 : 280;
+    int boxH = isWide ? 220 : 130;
+    int boxX = cx - boxW / 2;
+    int boxY = cy - boxH / 2 - (isWide ? 20 : 10);
+
+    // Expanding horizontal beam
+    for (int step = 1; step <= 24; step++) {
+        if (check(AnyKeyPress)) goto END_ANIM;
+        int curW = (boxW * step) / 24;
+        int curX = cx - curW / 2;
+        tft.drawFastHLine(curX, cy - (isWide ? 20 : 10), curW, accent);
+        delay(12);
+    }
+
+    // Outer double-border cyber card
+    tft.drawRoundRect(boxX, boxY, boxW, boxH, 8, accent);
+    tft.drawRoundRect(boxX + 1, boxY + 1, boxW - 2, boxH - 2, 7, darkGray);
+    tft.fillRect(boxX + 2, boxY + 2, boxW - 4, boxH - 4, TFT_BLACK);
+    drawHUDCorners(accent);
+
+    // 3. Title: "B R U C E"
+    {
+        int titleSize = isWide ? 5 : 3;
+        int titleY = boxY + (isWide ? 28 : 16);
+
+        // Shadow / Glow
+        tft.setTextColor(darkGray, TFT_BLACK);
+        tft.setTextSize(titleSize);
+        tft.drawCentreString("B R U C E", cx + 2, titleY + 2, 1);
+
+        // Main white title
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.drawCentreString("B R U C E", cx, titleY, 1);
+
+        // Glowing separator line
+        int lineW = isWide ? 320 : 180;
+        int sepY = titleY + (isWide ? 44 : 26);
+        tft.drawFastHLine(cx - lineW / 2, sepY, lineW, accent);
+        tft.drawFastHLine(cx - lineW / 4, sepY + 1, lineW / 2, TFT_WHITE);
+    }
+
+    // 4. "Edited by"
+    if (check(AnyKeyPress)) goto END_ANIM;
+    delay(120);
+    {
+        int editY = boxY + (isWide ? 90 : 54);
+        tft.setTextColor(neonCyan, TFT_BLACK);
+        tft.setTextSize(isWide ? FM : FP);
+        tft.drawCentreString("--- Edited by ---", cx, editY, 1);
+    }
+
+    // 5. "DEMIAN & TALIP" with badge container
+    if (check(AnyKeyPress)) goto END_ANIM;
+    delay(150);
+    {
+        int badgeW = isWide ? 380 : 230;
+        int badgeH = isWide ? 40 : 26;
+        int badgeX = cx - badgeW / 2;
+        int badgeY = boxY + (isWide ? 122 : 74);
+
+        tft.fillRoundRect(badgeX, badgeY, badgeW, badgeH, 6, 0x10A2);
+        tft.drawRoundRect(badgeX, badgeY, badgeW, badgeH, 6, neonGreen);
+        tft.drawRoundRect(badgeX + 1, badgeY + 1, badgeW - 2, badgeH - 2, 5, 0x03E0);
+
+        tft.setTextColor(TFT_WHITE, 0x10A2);
+        tft.setTextSize(isWide ? FM : FP);
+        tft.drawCentreString("DEMIAN & TALIP", cx, badgeY + (isWide ? 10 : 5), 1);
+    }
+
+    // 6. Animated Cyber Progress Bar & Status Text
+    {
+        int pBarW = isWide ? 380 : 210;
+        int pBarH = isWide ? 8 : 6;
+        int pBarX = cx - pBarW / 2;
+        int pBarY = boxY + boxH + (isWide ? 32 : 16);
+
+        tft.drawRoundRect(pBarX - 2, pBarY - 2, pBarW + 4, pBarH + 4, 3, darkGray);
+
+        const char* statusMsgs[] = {
+            "INITIALIZING HARDWARE...",
+            "LOADING DEMIAN & TALIP CORE...",
+            "SYSTEM READY // ENJOY"
+        };
+
+        for (int p = 0; p <= 100; p += 4) {
+            if (check(AnyKeyPress)) goto END_ANIM;
+
+            int fillW = (pBarW * p) / 100;
+            tft.fillRect(pBarX, pBarY, fillW, pBarH, accent);
+
+            // Update status text
+            int msgIdx = p / 34;
+            if (msgIdx > 2) msgIdx = 2;
+            tft.setTextSize(FP);
+            tft.setTextColor(midGray, TFT_BLACK);
+            tft.fillRect(cx - 160, pBarY + pBarH + 6, 320, 14, TFT_BLACK);
+            tft.drawCentreString(statusMsgs[msgIdx], cx, pBarY + pBarH + 6, 1);
+
+            delay(25);
         }
     }
+
+    // Brief hold to view the ready state
+    for (int hold = 0; hold < 6; hold++) {
+        if (check(AnyKeyPress)) goto END_ANIM;
+        delay(100);
+    }
+
+END_ANIM:
     tft.fillScreen(bruceConfig.bgColor);
 }
 

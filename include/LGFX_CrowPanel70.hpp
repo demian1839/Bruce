@@ -229,6 +229,18 @@ public:
     lgfx::LGFX_Device::fillRect(x, y, w, h, (uint16_t)color1);
   }
 
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *data, bool bpp8, const uint16_t *cmap) {
+    if (!data || !bpp8 || !cmap) return;
+    for (int32_t row = 0; row < h; ++row) {
+      for (int32_t col = 0; col < w; ++col) {
+        lgfx::LGFX_Device::drawPixel(x + col, y + row, cmap[data[row * w + col]]);
+      }
+    }
+  }
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t *data, bool bpp8, uint16_t *cmap) {
+    pushImage(x, y, w, h, (const uint8_t *)data, bpp8, (const uint16_t *)cmap);
+  }
+
   void setBrightness(uint8_t b) {
     _light_instance.setBrightness(b);
   }
@@ -239,9 +251,41 @@ public:
   }
 };
 
+using tft_display = LGFX_CrowPanel70;
+
 class CrowPanel_Sprite : public lgfx::LGFX_Sprite {
 public:
   using lgfx::LGFX_Sprite::LGFX_Sprite;
+
+  explicit CrowPanel_Sprite(LGFX_CrowPanel70 *parent) : lgfx::LGFX_Sprite(parent) {}
+
+  void *createSprite(int16_t w, int16_t h, uint8_t frames = 1) {
+    (void)frames;
+    return lgfx::LGFX_Sprite::createSprite(w, h);
+  }
+  void deleteSprite() {
+    lgfx::LGFX_Sprite::deleteSprite();
+  }
+  void setColorDepth(uint8_t depth) {
+    lgfx::LGFX_Sprite::setColorDepth(depth);
+  }
+  void pushSprite(int32_t x, int32_t y, uint32_t transparent = 0x00FFFFFF) {
+    lgfx::LGFX_Sprite::pushSprite(x, y, (uint16_t)transparent);
+  }
+  void pushToSprite(CrowPanel_Sprite *dest, int32_t x, int32_t y, uint32_t transparent = 0x00FFFFFF) {
+    lgfx::LGFX_Sprite::pushSprite(static_cast<lgfx::LGFX_Sprite *>(dest), x, y, (uint16_t)transparent);
+  }
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *data, bool bpp8, const uint16_t *cmap) {
+    if (!data || !bpp8 || !cmap) return;
+    for (int32_t row = 0; row < h; ++row) {
+      for (int32_t col = 0; col < w; ++col) {
+        lgfx::LGFX_Sprite::drawPixel(x + col, y + row, cmap[data[row * w + col]]);
+      }
+    }
+  }
+  void pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t *data, bool bpp8, uint16_t *cmap) {
+    pushImage(x, y, w, h, (const uint8_t *)data, bpp8, (const uint16_t *)cmap);
+  }
   void fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
     (void)color2;
     lgfx::LGFX_Sprite::fillRect(x, y, w, h, (uint16_t)color1);

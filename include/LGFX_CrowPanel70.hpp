@@ -264,10 +264,25 @@ public:
   }
 };
 
+#ifndef MAX_LOG_ENTRIES
+#define MAX_LOG_ENTRIES 64
+#endif
+#ifndef MAX_LOG_SIZE
+#define MAX_LOG_SIZE 128
+#endif
+#ifndef MAX_LOG_IMAGES
+#define MAX_LOG_IMAGES 1
+#endif
+#ifndef MAX_LOG_IMG_PATH
+#define MAX_LOG_IMG_PATH 512
+#endif
+
 class tft_logger : public LGFX_CrowPanel70 {
 public:
   using LGFX_CrowPanel70::LGFX_CrowPanel70;
   void setLogging(bool _log = true) { (void)_log; }
+  bool getLogging(void) const { return false; }
+  void setSleepMode(bool mode) { (void)mode; }
   void getBinLog(uint8_t *outBuffer, size_t &outSize) { (void)outBuffer; outSize = 0; }
   void clearLog() {}
   void addLogEntry(const uint8_t *buffer, uint8_t size) { (void)buffer; (void)size; }

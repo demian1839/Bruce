@@ -38,9 +38,15 @@ public:
       cfg.pin_pclk    = 0;  // PCLK
 
       cfg.freq_write = 12000000; // 12 MHz PCLK
-      cfg.hsync_polarity = 0;
-      cfg.vsync_polarity = 0;
-      cfg.pclk_idle_high = 1;
+      cfg.hsync_polarity    = 0;
+      cfg.hsync_front_porch = 40;
+      cfg.hsync_pulse_width = 48;
+      cfg.hsync_back_porch  = 40;
+      cfg.vsync_polarity    = 0;
+      cfg.vsync_front_porch = 1;
+      cfg.vsync_pulse_width = 31;
+      cfg.vsync_back_porch  = 13;
+      cfg.pclk_idle_high    = 1;
 
       _bus_instance.config(cfg);
     }
@@ -51,15 +57,14 @@ public:
       cfg.memory_height = 480;
       cfg.panel_width   = 800;
       cfg.panel_height  = 480;
-
-      cfg.hsync_pulse_width = 48;
-      cfg.hsync_back_porch  = 40;
-      cfg.hsync_front_porch = 40;
-      cfg.vsync_pulse_width = 31;
-      cfg.vsync_back_porch  = 13;
-      cfg.vsync_front_porch = 1;
-
+      cfg.offset_x      = 0;
+      cfg.offset_y      = 0;
       _panel_instance.config(cfg);
+    }
+    {
+      auto cfg = _panel_instance.config_detail();
+      cfg.use_psram = 1;
+      _panel_instance.config_detail(cfg);
     }
 
     {
@@ -126,18 +131,31 @@ public:
   }
   uint8_t getRotation(void) const { return _cur_rotation; }
 
-  int16_t fontHeight(int16_t font = 1) const {
+  int16_t fontHeight(int16_t font = 1) {
     (void)font;
     return lgfx::LGFX_Device::fontHeight();
   }
+  int16_t fontHeight(int16_t font = 1) const {
+    (void)font;
+    return const_cast<LGFX_CrowPanel70*>(this)->lgfx::LGFX_Device::fontHeight();
+  }
 
-  int16_t textWidth(const String& s, uint8_t font = 1) const {
+  int16_t textWidth(const String& s, uint8_t font = 1) {
     (void)font;
     return lgfx::LGFX_Device::textWidth(s.c_str());
   }
-  int16_t textWidth(const char* s, uint8_t font = 1) const {
+  int16_t textWidth(const String& s, uint8_t font = 1) const {
+    (void)font;
+    return const_cast<LGFX_CrowPanel70*>(this)->lgfx::LGFX_Device::textWidth(s.c_str());
+  }
+
+  int16_t textWidth(const char* s, uint8_t font = 1) {
     (void)font;
     return lgfx::LGFX_Device::textWidth(s);
+  }
+  int16_t textWidth(const char* s, uint8_t font = 1) const {
+    (void)font;
+    return const_cast<LGFX_CrowPanel70*>(this)->lgfx::LGFX_Device::textWidth(s);
   }
 
   bool getSwapBytes(void) const { return _swapBytes; }

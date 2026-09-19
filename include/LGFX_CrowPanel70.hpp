@@ -167,24 +167,30 @@ public:
   }
 
   int32_t drawRightString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawRightString(str.c_str(), dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawRightString(str.c_str(), dX, dY);
   }
   int32_t drawRightString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawRightString(str, dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawRightString(str, dX, dY);
   }
 
   int32_t drawCentreString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawCenterString(str.c_str(), dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawCenterString(str.c_str(), dX, dY);
   }
   int32_t drawCentreString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawCenterString(str, dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawCenterString(str, dX, dY);
   }
 
   int32_t drawString(const String& str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawString(str.c_str(), dX, dY);
   }
   int32_t drawString(const char* str, int32_t dX, int32_t dY, uint8_t font = 1) {
-    return lgfx::LGFX_Device::drawString(str, dX, dY, font);
+    (void)font;
+    return lgfx::LGFX_Device::drawString(str, dX, dY);
   }
 
   void fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color1, uint32_t color2) {
@@ -232,5 +238,4 @@ public:
   void restoreLogger() {}
 };
 
-using LGFX_Sprite = CrowPanel_Sprite;
 using tft_sprite = CrowPanel_Sprite;

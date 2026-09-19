@@ -18,7 +18,7 @@ header pointing back to this document.
 - Upstream: <https://github.com/flipperdevices/flipperzero-firmware>
 - License: GNU General Public License v3.0
 - Copyright (C) Flipper Devices Inc. and the flipperzero-firmware contributors.
-- Used by: the KeeLoq block cipher, the manufacturer "learning" key-derivation
+- Used by: the KeedddLoq block cipher, the manufacturer "learning" key-derivation
   schemes, the KeeLoq frame decoder/encoder framing, the `.sub` keystore format
   and protocol identities.
   Files: `src/modules/rf/protocols/rf_keeloq.{h,cpp}`,

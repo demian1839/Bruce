@@ -1,4 +1,4 @@
-name: Build CrowPanel 7.0 & CYD-2USB Firmware
+name: Build CrowPanel 7.0 (Classic + UI2) & CYD-2USB Firmware
 
 on:
   push:
@@ -11,6 +11,9 @@ on:
       - "main"
       - "master"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -42,48 +45,58 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pio-
 
-      - name: Firmware kompilieren (CrowPanel 7.0 & CYD-2USB)
+      - name: Firmware kompilieren (CrowPanel 7.0 Classic + UI2, CYD-2USB)
         run: |
-          pio run -e crowpanel-70 -e CYD-2USB
+          pio run -e crowpanel-70 -e crowpanel-70-ui2 -e CYD-2USB
 
       - name: Binaries zu Flash-Images zusammenfuegen (Merged Bin)
         run: |
-          mkdir -p .pio/build/crowpanel-70 .pio/build/CYD-2USB
-          # CrowPanel 7.0 (ESP32-S3: bootloader @ 0x0)
-          if [ -f "Bruce-crowpanel-70.bin" ]; then
-            cp Bruce-crowpanel-70.bin .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin
-          elif [ -d ".pio/build/crowpanel-70" ]; then
-            python -m esptool --chip esp32s3 merge_bin \
-              -o .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin \
-              --flash_mode dio \
-              --flash_size 4MB \
-              0x0 .pio/build/crowpanel-70/bootloader.bin \
-              0x8000 .pio/build/crowpanel-70/partitions.bin \
-              0x10000 .pio/build/crowpanel-70/firmware.bin
-          fi
+          set -e
+          # ESP32-S3 Boards: Bootloader @ 0x0 / ESP32 Boards: Bootloader @ 0x1000
+          merge() {
+            env_name="$1"; chip="$2"; boot_off="$3"; out_name="$4"
+            build_dir=".pio/build/${env_name}"
+            mkdir -p "${build_dir}"
+            if [ -f "Bruce-${env_name}.bin" ]; then
+              cp "Bruce-${env_name}.bin" "${build_dir}/${out_name}"
+            elif [ -f "${build_dir}/firmware.bin" ]; then
+              python -m esptool --chip "${chip}" merge_bin \
+                -o "${build_dir}/${out_name}" \
+                --flash_mode dio \
+                --flash_size 4MB \
+                "${boot_off}" "${build_dir}/bootloader.bin" \
+                0x8000 "${build_dir}/partitions.bin" \
+                0x10000 "${build_dir}/firmware.bin"
+            else
+              echo "::error::Kein Build-Ergebnis fuer ${env_name}"
+              exit 1
+            fi
+          }
 
-          # CYD-2USB (ESP32: bootloader @ 0x1000)
-          if [ -f "Bruce-CYD-2USB.bin" ]; then
-            cp Bruce-CYD-2USB.bin .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin
-          elif [ -d ".pio/build/CYD-2USB" ]; then
-            python -m esptool --chip esp32 merge_bin \
-              -o .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin \
-              --flash_mode dio \
-              --flash_size 4MB \
-              0x1000 .pio/build/CYD-2USB/bootloader.bin \
-              0x8000 .pio/build/CYD-2USB/partitions.bin \
-              0x10000 .pio/build/CYD-2USB/firmware.bin
-          fi
+          merge crowpanel-70     esp32s3 0x0    bruce_crowpanel70_merged.bin
+          merge crowpanel-70-ui2 esp32s3 0x0    bruce_crowpanel70_ui2_merged.bin
+          merge CYD-2USB         esp32   0x1000 bruce_CYD2USB_merged.bin
 
-      - name: CrowPanel 7.0 Artefakt hochladen
+      - name: CrowPanel 7.0 Artefakt hochladen (Classic UI)
         uses: actions/upload-artifact@v4
         with:
-          name: bruce-crowpanel70-firmware
+          name: bruce-crowpanel70-classic-firmware
           path: |
             .pio/build/crowpanel-70/firmware.bin
             .pio/build/crowpanel-70/bootloader.bin
             .pio/build/crowpanel-70/partitions.bin
             .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin
+          retention-days: 14
+
+      - name: CrowPanel 7.0 Artefakt hochladen (UI2 / neue UI)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bruce-crowpanel70-ui2-firmware
+          path: |
+            .pio/build/crowpanel-70-ui2/firmware.bin
+            .pio/build/crowpanel-70-ui2/bootloader.bin
+            .pio/build/crowpanel-70-ui2/partitions.bin
+            .pio/build/crowpanel-70-ui2/bruce_crowpanel70_ui2_merged.bin
           retention-days: 14
 
       - name: CYD-2USB Artefakt hochladen
@@ -96,3 +109,25 @@ jobs:
             .pio/build/CYD-2USB/partitions.bin
             .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin
           retention-days: 14
+
+      - name: Merged Bins als Release veroeffentlichen (crowpanel-latest)
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: crowpanel-latest
+          name: CrowPanel 7.0 - letzter CI Build
+          body: |
+            Automatischer Build von `${{ github.ref_name }}` (${{ github.sha }}).
+
+            - `bruce_crowpanel70_merged.bin` - CrowPanel 7.0, klassische UI
+            - `bruce_crowpanel70_ui2_merged.bin` - CrowPanel 7.0, neue UI
+            - `bruce_CYD2USB_merged.bin` - CYD-2USB (unveraendert, klassische UI)
+
+            Flashen: `esptool.py --chip esp32s3 write_flash 0x0 <datei>` (CYD: `--chip esp32`).
+          prerelease: true
+          files: |
+            .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin
+            .pio/build/crowpanel-70-ui2/bruce_crowpanel70_ui2_merged.bin
+            .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

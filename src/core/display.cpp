@@ -8,7 +8,12 @@
 #include <interface.h> //for charging ischarging to print charging indicator
 #include <memory>
 
+#if defined(BRUCE_UI_MODERN)
+#include "ui_modern.h"
+#define MAX_MENU_SIZE ui2::maxListRows()
+#else
 #define MAX_MENU_SIZE (int)(tftHeight / 25)
+#endif
 
 // Send the ST7789 into or out of sleep mode
 void panelSleep(bool on) {
@@ -66,6 +71,10 @@ void displayScrollingText(const String &text, Opt_Coord &coord, bool highlight) 
 ***************************************************************************************/
 void TouchFooter(uint16_t color) {
 #if defined(HAS_TOUCH)
+#if defined(BRUCE_UI_MODERN)
+    ui2::navBar(color, "< PREV", "OK", "NEXT >");
+    return;
+#endif
     int btnH = (tftWidth >= 480) ? 43 : 18;
     int btnY = tftHeight + 2;
     int textY = (tftWidth >= 480) ? (btnY + 12) : (btnY + 2);
@@ -85,6 +94,10 @@ void TouchFooter(uint16_t color) {
 ** Description:   Draw touch screen footer
 ***************************************************************************************/
 void MegaFooter(uint16_t color) {
+#if defined(BRUCE_UI_MODERN)
+    ui2::navBar(color, "EXIT", "UP", "DOWN");
+    return;
+#endif
     int btnH = (tftWidth >= 480) ? 43 : 18;
     int btnY = tftHeight + 2;
     int textY = (tftWidth >= 480) ? (btnY + 12) : (btnY + 2);
@@ -560,6 +573,7 @@ int loopOptions(
     int devModeCounter = 0;
     static unsigned long _clock_bat_timer = millis();
     if (options.size() > MAX_MENU_SIZE) { menuSize = MAX_MENU_SIZE; }
+#if !defined(BRUCE_UI_MODERN)
     if (index > 0)
         tft.fillRoundRect(
             tftWidth * 0.10,
@@ -569,6 +583,7 @@ int loopOptions(
             5,
             bruceConfig.bgColor
         );
+#endif
     if (index >= options.size()) index = 0;
     bool firstRender = true;
     unsigned long menuOpenTs =
@@ -597,7 +612,12 @@ int loopOptions(
             options[index].hovered = true;
 
             bool renderedByLambda = false;
-            if (options[index].hover)
+#if defined(BRUCE_UI_MODERN)
+            ui2::setBackAffordance(menuType != MENU_TYPE_MAIN);
+            if (menuType == MENU_TYPE_MAIN)
+                renderedByLambda = ui2::mainGrid(index, options, firstRender);
+#endif
+            if (!renderedByLambda && options[index].hover)
                 renderedByLambda = options[index].hover(options[index].hoverPointer, true);
 
             if (!renderedByLambda) {
@@ -616,6 +636,38 @@ int loopOptions(
             firstRender = false;
             redraw = false;
         }
+
+#if defined(BRUCE_UI_MODERN) && defined(HAS_TOUCH)
+        // Direct tap on a tile / list row instead of walking there with prev-next
+        if (touchPoint.pressed && millis() - menuOpenTs > 600) {
+            int hit = -1;
+            bool back = false;
+            if (menuType != MENU_TYPE_MAIN && ui2::backHitTest(touchPoint.x, touchPoint.y)) back = true;
+            else if (menuType == MENU_TYPE_MAIN)
+                hit = ui2::gridHitTest(touchPoint.x, touchPoint.y, options.size());
+            else if (menuType != MENU_TYPE_SUBMENU)
+                hit = ui2::listHitTest(touchPoint.x, touchPoint.y, options.size());
+
+            if (back || (hit >= 0 && options[hit].enabled)) {
+                touchPoint.pressed = false;
+                touchPoint.Clear();
+                PrevPress = false;
+                NextPress = false;
+                UpPress = false;
+                DownPress = false;
+                SelPress = false;
+                EscPress = false;
+                if (back) {
+                    index = -1;
+                    break;
+                }
+                index = hit;
+                Serial.println("Selected: " + String(options[index].label));
+                options[index].operation();
+                break;
+            }
+        }
+#endif
 
         // handleSerialCommands(); // always use serial task for it
 #ifdef HAS_KEYBOARD
@@ -779,6 +831,10 @@ Opt_Coord drawOptions(
 ) {
     static int last_index = 0;
 
+#if defined(BRUCE_UI_MODERN)
+    return ui2::optionList(index, options, fgcolor, selcolor, bgcolor, firstRender);
+#endif
+
     Opt_Coord coord;
     int menuSize = options.size();
     if (options.size() > MAX_MENU_SIZE) { menuSize = MAX_MENU_SIZE; }
@@ -873,6 +929,10 @@ Opt_Coord drawOptions(
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
 void drawSubmenu(int index, std::vector<Option> &options, const char *title) {
+#if defined(BRUCE_UI_MODERN)
+    ui2::carousel(index, options, title);
+    return;
+#endif
     drawStatusBar();
     int menuSize = options.size();
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
@@ -931,6 +991,10 @@ void drawSubmenu(int index, std::vector<Option> &options, const char *title) {
 }
 
 void drawStatusBar() {
+#if defined(BRUCE_UI_MODERN)
+    ui2::headerBar();
+    return;
+#endif
     uint8_t bat = getBattery();
     if (bat > 0) drawBatteryStatus(bat);
 

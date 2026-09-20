@@ -42,6 +42,30 @@ public:
         drawStatusBar();
     }
 
+    // Render the vector icon into an arbitrary box, used by the tiled main menu.
+    // Restores the regular full screen coordinates afterwards.
+    void drawIconAt(int centerX, int centerY, int areaSize, float scale = 1) {
+        int oldCX = iconCenterX, oldCY = iconCenterY;
+        int oldW = iconAreaW, oldH = iconAreaH;
+        int oldX = iconAreaX, oldY = iconAreaY;
+
+        iconCenterX = centerX;
+        iconCenterY = centerY;
+        iconAreaW = areaSize;
+        iconAreaH = areaSize;
+        iconAreaX = centerX - areaSize / 2;
+        iconAreaY = centerY - areaSize / 2;
+
+        drawIcon(scale);
+
+        iconCenterX = oldCX;
+        iconCenterY = oldCY;
+        iconAreaW = oldW;
+        iconAreaH = oldH;
+        iconAreaX = oldX;
+        iconAreaY = oldY;
+    }
+
     void drawArrows(float scale = 1) {
         tft.fillRect(arrowAreaX, iconAreaY, arrowAreaW, iconAreaH, bruceConfig.bgColor);
         tft.fillRect(

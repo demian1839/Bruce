@@ -29,5 +29,6 @@
     "require_upload_port": true,
     "speed": 921600
   },
+  "url": "https://espressif.com",
   "vendor": "Espressif"
 }

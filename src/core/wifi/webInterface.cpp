@@ -11,6 +11,7 @@
 #include "esp_task_wdt.h"
 #include "webFiles.h"
 #include <MD5Builder.h>
+#include <DNSServer.h>
 #include <cstddef>
 #include <esp32-hal-psram.h>
 #include <esp_heap_caps.h>
@@ -28,6 +29,16 @@ AsyncWebServer *server = nullptr; // initialise webserver
 const char *host = "bruce";
 String uploadFolder = "";
 static bool mdnsRunning = false;
+static DNSServer *webDnsServer = nullptr;
+static TaskHandle_t webDnsTaskHandle = nullptr;
+
+static void webCaptivePortalDnsTask(void *pv) {
+    while (webDnsServer) {
+        webDnsServer->processNextRequest();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    vTaskDelete(NULL);
+}
 
 // Generate random token
 String generateToken(int length = 24) {
@@ -51,6 +62,12 @@ void stopWebUi() {
     if (mdnsRunning) {
         MDNS.end();
         mdnsRunning = false;
+    }
+    if (webDnsServer) {
+        webDnsServer->stop();
+        delete webDnsServer;
+        webDnsServer = nullptr;
+        webDnsTaskHandle = nullptr;
     }
 }
 
@@ -266,7 +283,13 @@ void handleUpload(
     }
 }
 
-void notFound(AsyncWebServerRequest *request) { request->send(404, "text/plain", "Nothing in here Sharky"); }
+void notFound(AsyncWebServerRequest *request) {
+    if (webDnsServer) {
+        request->redirect("http://" + WiFi.softAPIP().toString() + "/");
+        return;
+    }
+    request->send(404, "text/plain", "Nothing in here Sharky");
+}
 
 /**********************************************************************
 **  Function: drawWebUiScreen
@@ -397,6 +420,16 @@ void configureWebServer() {
     mdnsRunning = startMdnsResponder();
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     server->onNotFound(notFound);
+
+    // Captive Portal Probes (iOS, Android, Windows, macOS)
+    auto captiveRedirect = [](AsyncWebServerRequest *request) {
+        request->redirect("http://" + WiFi.softAPIP().toString() + "/");
+    };
+    server->on("/generate_204", HTTP_GET, captiveRedirect);
+    server->on("/hotspot-detect.html", HTTP_GET, captiveRedirect);
+    server->on("/canonical.html", HTTP_GET, captiveRedirect);
+    server->on("/ncsi.txt", HTTP_GET, captiveRedirect);
+    server->on("/connecttest.txt", HTTP_GET, captiveRedirect);
 
     // Index
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -770,6 +803,14 @@ void startWebUi(bool mode_ap) {
 
         isWebUIActive = true;
     }
+
+    if (mode_ap && !webDnsServer) {
+        webDnsServer = new DNSServer();
+        webDnsServer->start(53, "*", WiFi.softAPIP());
+        xTaskCreate(webCaptivePortalDnsTask, "WebCapDNS", 2048, NULL, 1, &webDnsTaskHandle);
+        Serial.println("[CaptivePortal] DNS server running, redirecting to: " + WiFi.softAPIP().toString());
+    }
+
     tft.setLogging();
     drawWebUiScreen(mode_ap);
 #ifdef HAS_SCREEN // Headless always run in the background!

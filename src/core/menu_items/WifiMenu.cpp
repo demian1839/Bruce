@@ -49,6 +49,7 @@ void WifiMenu::optionsMenu() {
     if (!WiFi.isConnected() && !WiFi.AP.started()) {
         options = {
             {"Connect to Wifi", lambdaHelper(wifiConnectMenu, WIFI_STA)},
+            {"Connect Enterprise (802.1X)", connectEnterpriseMenu},
             {"Start WiFi AP", [=]() {
                  wifiConnectMenu(WIFI_AP);
                  displayInfo("pwd: " + bruceConfig.wifiAp.pwd, true);

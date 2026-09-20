@@ -1,4 +1,4 @@
-name: Build CrowPanel 7.0 & CYD-2USB Firmware
+name: Build CrowPanel 7.0, CYD-2USB & JC-ESP32P4-M3 Firmware
 
 on:
   push:
@@ -38,13 +38,18 @@ jobs:
           path: |
             ~/.platformio
             .pio
-          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini', '**/boards/crowpanel-70.ini', '**/boards/CYD-2432S028/CYD-2432S028.ini') }}
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini', '**/boards/crowpanel-70.ini', '**/boards/CYD-2432S028/CYD-2432S028.ini', '**/boards/jc-esp32p4-m3/jc-esp32p4-m3.ini') }}
           restore-keys: |
             ${{ runner.os }}-pio-
 
       - name: Firmware kompilieren (CrowPanel 7.0 & CYD-2USB)
         run: |
           pio run -e crowpanel-70 -e CYD-2USB
+
+      - name: JC-ESP32P4-M3 kompilieren (Headless WebUI)
+        continue-on-error: true
+        run: |
+          pio run -e jc-esp32p4-m3
 
       - name: Binaries zu Flash-Images zusammenfuegen (Merged Bin)
         run: |
@@ -74,6 +79,25 @@ jobs:
             cd ../../..
           fi
 
+          # JC-ESP32P4-M3 (ESP32-P4: bootloader @ 0x0, 16MB)
+          if [ -d ".pio/build/jc-esp32p4-m3" ]; then
+            cd .pio/build/jc-esp32p4-m3
+            python -m esptool --chip esp32p4 merge_bin \
+              -o bruce_JC-ESP32P4-M3_merged.bin \
+              --flash_mode qio \
+              --flash_size 16MB \
+              0x0 bootloader.bin \
+              0x8000 partitions.bin \
+              0x10000 firmware.bin || python -m esptool merge_bin \
+              -o bruce_JC-ESP32P4-M3_merged.bin \
+              --flash_mode qio \
+              --flash_size 16MB \
+              0x0 bootloader.bin \
+              0x8000 partitions.bin \
+              0x10000 firmware.bin
+            cd ../../..
+          fi
+
       - name: CrowPanel 7.0 Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
@@ -94,4 +118,15 @@ jobs:
             .pio/build/CYD-2USB/bootloader.bin
             .pio/build/CYD-2USB/partitions.bin
             .pio/build/CYD-2USB/bruce_CYD2USB_merged.bin
+          retention-days: 14
+
+      - name: JC-ESP32P4-M3 Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: bruce-JC-ESP32P4-M3-firmware
+          path: |
+            .pio/build/jc-esp32p4-m3/firmware.bin
+            .pio/build/jc-esp32p4-m3/bootloader.bin
+            .pio/build/jc-esp32p4-m3/partitions.bin
+            .pio/build/jc-esp32p4-m3/bruce_JC-ESP32P4-M3_merged.bin
           retention-days: 14

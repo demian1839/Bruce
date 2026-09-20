@@ -21,6 +21,12 @@ void wifiDisconnect();
 bool wifiConnectMenu(wifi_mode_t = WIFI_MODE_STA);
 
 /**
+ * @brief Connects to a WPA2-Enterprise network (802.1X PEAP/MSCHAPv2)
+ */
+bool _connectToEnterpriseWifi(const String &ssid, const String &username, const String &password, const String &identity = "");
+void connectEnterpriseMenu();
+
+/**
  * @brief Scans the networks and tries to connect to a known network
  * @param mode connection mode(void)
  * @note This is the primary entry point for establishing connections in the Headless environment

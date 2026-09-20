@@ -13,6 +13,12 @@
 #include <esp_netif.h>
 #include <globals.h>
 
+#if __has_include("esp_eap_client.h")
+#include "esp_eap_client.h"
+#elif __has_include("esp_wpa2.h")
+#include "esp_wpa2.h"
+#endif
+
 static TaskHandle_t timezoneTaskHandle = NULL;
 static bool wifiTransitioning = false;
 
@@ -51,7 +57,104 @@ void ensureWifiPlatform() {
     }
 }
 
+bool _connectToEnterpriseWifi(const String &ssid, const String &username, const String &pwd, const String &identity) {
+    if (FORCE_RADIO_TEARDOWN_ON_SWITCH) {
+        if (BLEConnected) {
+            displayWarning("Board with no PSRAM, closing BLE Stack");
+            vTaskDelay(700 / portTICK_PERIOD_MS);
+        }
+        stopBLEStack();
+        vTaskDelay(300 / portTICK_PERIOD_MS);
+    }
+
+    RAM_LOG("wifi pre-mode");
+    drawMainBorderWithTitle("WPA2-Enterprise");
+    padprintln("");
+    padprint("Connecting to: " + ssid + ".");
+
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_MODE_STA);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+
+    String id = (identity.length() > 0) ? identity : username;
+
+#if __has_include("esp_eap_client.h")
+    esp_eap_client_set_identity((const unsigned char *)id.c_str(), id.length());
+    esp_eap_client_set_username((const unsigned char *)username.c_str(), username.length());
+    esp_eap_client_set_password((const unsigned char *)pwd.c_str(), pwd.length());
+    esp_wifi_sta_enterprise_enable();
+#elif __has_include("esp_wpa2.h")
+    esp_wifi_sta_wpa2_ent_set_identity((const unsigned char *)id.c_str(), id.length());
+    esp_wifi_sta_wpa2_ent_set_username((const unsigned char *)username.c_str(), username.length());
+    esp_wifi_sta_wpa2_ent_set_password((const unsigned char *)pwd.c_str(), pwd.length());
+    esp_wifi_sta_wpa2_ent_enable();
+#endif
+
+    WiFi.begin(ssid.c_str());
+
+    int i = 1;
+    while (!WiFi.isConnected()) {
+        if (tft.getCursorX() >= tftWidth - 12) {
+            padprintln("");
+            padprint("");
+        }
+#ifdef HAS_SCREEN
+        tft.print(".");
+#else
+        Serial.print(".");
+#endif
+
+        if (i > 30) {
+            displayError("Enterprise Failed");
+            vTaskDelay(500 / portTICK_RATE_MS);
+#if __has_include("esp_eap_client.h")
+            esp_wifi_sta_enterprise_disable();
+#elif __has_include("esp_wpa2.h")
+            esp_wifi_sta_wpa2_ent_disable();
+#endif
+            break;
+        }
+
+        vTaskDelay(500 / portTICK_RATE_MS);
+        i++;
+    }
+
+    if (WiFi.isConnected()) {
+        wifiConnected = true;
+        wifiIP = WiFi.localIP().toString();
+        Serial.println("\nWPA2-Enterprise Connected! IP: " + wifiIP);
+        if (timezoneTaskHandle == NULL) {
+            xTaskCreate(updateTimezoneTask, "updateTimezone", 4096, NULL, 1, &timezoneTaskHandle);
+        }
+    }
+    return WiFi.isConnected();
+}
+
+void connectEnterpriseMenu() {
+    String ssid = keyboard("", 32, "Enterprise SSID:");
+    if (ssid == "\x1B" || ssid.length() == 0) return;
+    String username = keyboard("", 63, "Username (802.1X):");
+    if (username == "\x1B" || username.length() == 0) return;
+    String password = keyboard("", 63, "Password:", true);
+    if (password == "\x1B") return;
+    String identity = keyboard(username, 63, "Identity (opt):");
+    if (identity == "\x1B") identity = username;
+
+    _connectToEnterpriseWifi(ssid, username, password, identity);
+}
+
 bool _wifiConnect(const String &ssid, int encryption) {
+    if (encryption == WIFI_AUTH_WPA2_ENTERPRISE) {
+        String username = keyboard("", 63, "Username (802.1X):", false);
+        if (username == "\x1B" || username.length() == 0) return false;
+        String password = keyboard("", 63, "Password:", true);
+        if (password == "\x1B") return false;
+        String identity = keyboard(username, 63, "Identity (opt):", false);
+        if (identity == "\x1B") identity = username;
+
+        return _connectToEnterpriseWifi(ssid, username, password, identity);
+    }
+
     String password = bruceConfig.getWifiPassword(ssid);
     if (password == "" && encryption > 0) { password = keyboard(password, 63, "Network Password:", true); }
     if (password == "\x1B") return false;
@@ -165,6 +268,12 @@ void wifiDisconnect() {
         WiFi.mode(WIFI_OFF);
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
+
+#if __has_include("esp_eap_client.h")
+    esp_wifi_sta_enterprise_disable();
+#elif __has_include("esp_wpa2.h")
+    esp_wifi_sta_wpa2_ent_disable();
+#endif
 
     wifiConnected = false;
     wifiTransitioning = false;

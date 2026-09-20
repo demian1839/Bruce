@@ -54,7 +54,5 @@
 #include "../ESP32-C5/pins_arduino.h"
 #elif NM_CYD_ESP32C5
 #include "../nm-cyd-c5/pins_arduino.h"
-#elif JC_ESP32P4_M3
-#include "../jc-esp32p4-m3/pins_arduino.h"
 #endif
 

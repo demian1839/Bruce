@@ -645,10 +645,6 @@ void setup() {
             NULL
         );
     }
-#else
-    // Headless device (e.g. JC-ESP32P4-M3): Auto-start WebUI AP Hotspot with Captive Portal
-    Serial.println("[BOOT] Headless device: Starting WebUI AP Hotspot...");
-    startWebUi(true);
 #endif
     startSerialCommandsHandlerTask(true);
 

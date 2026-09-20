@@ -6,7 +6,9 @@
 #if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
 #include "modules/bjs_interpreter/interpreter.h"
 #endif
+#if !defined(LITE_VERSION) && !defined(NO_BLE)
 #include "modules/ble_api/ble_api.hpp"
+#endif
 #include "modules/others/qrcode_menu.h"
 #include "modules/rf/rf_utils.h" // for initRfModule
 #include "mykeyboard.h"

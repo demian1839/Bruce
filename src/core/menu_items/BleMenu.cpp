@@ -1,4 +1,6 @@
 #include "BleMenu.h"
+
+#if !defined(NO_BLE)
 #include "core/display.h"
 #include "core/utils.h"
 #include "modules/badusb_ble/ducky_typer.h"
@@ -137,3 +139,10 @@ void BleMenu::drawIcon(float scale) {
         bruceConfig.bgColor
     );
 }
+
+#else
+
+void BleMenu::optionsMenu() {}
+void BleMenu::drawIcon(float scale) {}
+
+#endif

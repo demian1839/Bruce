@@ -8,7 +8,9 @@
 #include "core/utils.h"
 #include "core/wifi/wifi_mac.h"
 #include "esp_wifi.h"
+#if !defined(NO_BLE)
 #include "modules/ble/ble_common.h"
+#endif
 #include <esp_event.h>
 #include <esp_netif.h>
 #include <globals.h>

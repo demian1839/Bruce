@@ -9,7 +9,9 @@
 #ifndef __WAR_DRIVING_H__
 #define __WAR_DRIVING_H__
 
+#if !defined(NO_BLE)
 #include "modules/ble/ble_common.h"
+#endif
 #include <TinyGPS++.h>
 #include <cstdint>
 #include <esp_wifi_types.h>

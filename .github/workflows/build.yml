@@ -53,6 +53,7 @@ jobs:
 
       - name: Binaries zu Flash-Images zusammenfuegen (Merged Bin)
         run: |
+          mkdir -p .pio/build/crowpanel-70 .pio/build/CYD-2USB .pio/build/jc-esp32p4-m3
           # CrowPanel 7.0 (ESP32-S3: bootloader @ 0x0)
           if [ -f "Bruce-crowpanel-70.bin" ]; then
             cp Bruce-crowpanel-70.bin .pio/build/crowpanel-70/bruce_crowpanel70_merged.bin

@@ -12,7 +12,9 @@
 #include "core/sd_functions.h"
 #include "core/wifi/wifi_common.h"
 #include "current_year.h"
+#if !defined(NO_BLE)
 #include "modules/ble/ble_common.h"
+#endif
 #include <cctype>
 
 #define MAX_WAIT 5000
@@ -99,11 +101,13 @@ bool Wardriving::begin_gps() {
 
 void Wardriving::end() {
     if (scanWiFi) wifiDisconnect();
+#if !defined(NO_BLE)
     if (scanBLE) {
         BLEDevice::deinit(true);
         pBLEScan = nullptr;
         bleInitialized = false;
     }
+#endif
 
     GPSserial.end();
     restorePins();
@@ -254,10 +258,12 @@ void Wardriving::scanWiFiBLE() {
     padprintf("Coord: %.6f, %.6f\n", gps.location.lat(), gps.location.lng());
     padprintln("Start Scanning...");
 
+#if !defined(NO_BLE)
     if (scanBLE && pBLEScan != nullptr && pBLEScan->isScanning()) {
         pBLEScan->stop();
         vTaskDelay(50 / portTICK_PERIOD_MS);
     }
+#endif
 
     int networksFound = scanWiFi ? scanWiFiNetworks() : 0;
     int bleFound = 0;
@@ -313,6 +319,7 @@ void Wardriving::scanWiFiBLE() {
         vTaskDelay(120 / portTICK_PERIOD_MS);
     }
 
+#if !defined(NO_BLE)
     if (scanBLE) {
         if (!bleInitialized || pBLEScan == nullptr) {
             if (!BLEDevice::init("")) {
@@ -418,6 +425,7 @@ void Wardriving::scanWiFiBLE() {
         pBLEScan->clearResults();
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
+#endif
 
 scan_summary:
     if (scanWiFi || scanBLE) {

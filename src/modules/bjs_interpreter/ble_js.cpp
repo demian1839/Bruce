@@ -1,4 +1,4 @@
-#if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
+#if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER) && !defined(NO_BLE)
 #include "ble_js.h"
 #include "modules/ble/ble_common.h"
 

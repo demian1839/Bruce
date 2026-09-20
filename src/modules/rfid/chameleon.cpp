@@ -7,6 +7,8 @@
  */
 
 #include "chameleon.h"
+
+#if !defined(LITE_VERSION) && !defined(NO_BLE)
 #include "core/display.h"
 #include "core/mykeyboard.h"
 
@@ -995,3 +997,5 @@ void Chameleon::delayWithReturn(uint32_t ms) {
     auto tm = millis();
     while (millis() - tm < ms && !returnToMenu) { vTaskDelay(pdMS_TO_TICKS(50)); }
 }
+
+#endif

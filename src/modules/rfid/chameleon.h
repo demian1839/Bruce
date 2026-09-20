@@ -8,6 +8,8 @@
 
 #ifndef __CHAMELEON_H__
 #define __CHAMELEON_H__
+
+#if !defined(LITE_VERSION) && !defined(NO_BLE)
 #include <chameleonUltra.h>
 #include <set>
 
@@ -149,5 +151,18 @@ private:
     void saveScanResult();
     void delayWithReturn(uint32_t ms);
 };
+
+#else
+
+class Chameleon {
+public:
+    Chameleon() {}
+    ~Chameleon() {}
+    void setup() {}
+    void loop() {}
+    bool connect() { return false; }
+};
+
+#endif
 
 #endif
